@@ -1,103 +1,178 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { BarChart3, Users, DollarSign, MessageSquare, Settings, Sparkles } from "lucide-react"
+import { GlobalSidebar } from "@/components/global-sidebar"
+import { ExecutiveDashboard } from "@/components/executive-dashboard"
+import ContentStudio from "@/components/departments/content-studio"
+import Marketing from "@/components/departments/marketing"
+import Support from "@/components/departments/support"
+import HR from "@/components/departments/hr"
+import Finance from "@/components/departments/finance"
+import Operations from "@/components/departments/operations"
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+const departments = [
+  {
+    id: "content-studio",
+    name: "Content Studio",
+    icon: Sparkles,
+    color: "bg-gradient-to-r from-indigo-500 to-purple-500",
+    description: "AI-powered content creation with approval workflows",
+    features: ["AI Content Generation", "Client Management", "Approval Workflow", "Multi-format Export"],
+    status: "active",
+    activeUsers: 8,
+    completedTasks: 156,
+  },
+  {
+    id: "marketing",
+    name: "Marketing Hub",
+    icon: BarChart3,
+    color: "bg-blue-500",
+    description: "Campaign management, content creation, and analytics",
+    features: ["Content Generation", "Campaign Analytics", "Social Media Management", "SEO Optimization"],
+    status: "active",
+    activeUsers: 12,
+    completedTasks: 45,
+  },
+  {
+    id: "support",
+    name: "Support Center",
+    icon: MessageSquare,
+    color: "bg-emerald-500",
+    description: "Customer support, ticket management, and knowledge base",
+    features: ["Ticket Management", "Live Chat", "Knowledge Base", "Customer Analytics"],
+    status: "active",
+    activeUsers: 8,
+    completedTasks: 67,
+  },
+  {
+    id: "hr",
+    name: "HR Management",
+    icon: Users,
+    color: "bg-purple-500",
+    description: "Employee management, recruitment, and performance tracking",
+    features: ["Employee Onboarding", "Performance Reviews", "Recruitment", "Time Tracking"],
+    status: "active",
+    activeUsers: 5,
+    completedTasks: 23,
+  },
+  {
+    id: "finance",
+    name: "Finance Control",
+    icon: DollarSign,
+    color: "bg-amber-500",
+    description: "Financial planning, expense tracking, and reporting",
+    features: ["Expense Management", "Budget Planning", "Financial Reports", "Invoice Management"],
+    status: "active",
+    activeUsers: 6,
+    completedTasks: 34,
+  },
+  {
+    id: "operations",
+    name: "Operations Hub",
+    icon: Settings,
+    color: "bg-orange-500",
+    description: "Project management, workflow automation, and resource planning",
+    features: ["Project Management", "Workflow Automation", "Resource Planning", "Quality Control"],
+    status: "active",
+    activeUsers: 15,
+    completedTasks: 89,
+  },
+]
+
+// Component mapping
+const departmentComponents = {
+  "content-studio": ContentStudio,
+  marketing: Marketing,
+  support: Support,
+  hr: HR,
+  finance: Finance,
+  operations: Operations,
+}
+
+export default function Dashboard() {
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
+  const [activeSection, setActiveSection] = useState("dashboard")
+
+  const handleDepartmentChange = (departmentId: string) => {
+    if (departmentId === "dashboard") {
+      setSelectedDepartment(null)
+      setActiveSection("dashboard")
+    } else {
+      setSelectedDepartment(departmentId)
+      setActiveSection("workspace") // Default section for departments
+    }
+  }
+
+  if (selectedDepartment) {
+    const DepartmentComponent = departmentComponents[selectedDepartment as keyof typeof departmentComponents]
+
+    if (DepartmentComponent) {
+      return (
+        <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+          <GlobalSidebar
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            onDepartmentChange={handleDepartmentChange}
+            currentDepartment={selectedDepartment}
+            defaultExpanded={false}
+          />
+          <div className="flex-1">
+            <DepartmentComponent
+              onBack={() => handleDepartmentChange("dashboard")}
+              department={departments.find((d) => d.id === selectedDepartment)}
+              activeSection={activeSection}
+              onSectionChange={setActiveSection}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )
+    }
+  }
+
+  return (
+    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <GlobalSidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onDepartmentChange={handleDepartmentChange}
+        currentDepartment={selectedDepartment}
+      />
+
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 shadow-lg">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center space-x-3">
+                <div>
+                  <h1 className="text-xl font-bold text-white">OmniDesk Executive Platform</h1>
+                  <p className="text-sm text-slate-400">Strategic Business Intelligence</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">Executive Access</Badge>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-600 text-slate-300 hover:bg-slate-700 bg-transparent"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <ExecutiveDashboard onDepartmentChange={handleDepartmentChange} />
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
