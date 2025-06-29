@@ -1,0 +1,25 @@
+{
+    "mcpServers": {
+      "github": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+        }
+      },
+      "taskmaster-ai": {
+        "command": "npx",
+        "args": ["task-master-ai"],
+        "env": {
+          "GOOGLE_API_KEY": "AIzaSyAeqq-x7OnjaqMKV_97h5eCHNkcarXb8Oo"
+        }
+      },
+  
+      "browser-tools": {
+        "command": "npx",
+        "args": ["-y", "@agentdeskai/browser-tools-mcp@1.2.0"],
+        "enabled": true
+      }
+    },
+     "contextFileName": "gemini.md "
+  }
