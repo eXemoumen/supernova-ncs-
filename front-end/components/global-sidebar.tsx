@@ -27,7 +27,9 @@ import {
   ChevronRight,
   Brain,
   Crown,
+  LogOut, // Import LogOut icon
 } from "lucide-react"
+import { supabase } from "../lib/supabaseClient" // Import supabase client
 
 interface GlobalSidebarProps {
   activeSection?: string
@@ -35,6 +37,7 @@ interface GlobalSidebarProps {
   onDepartmentChange?: (department: string) => void
   currentDepartment?: string | null
   defaultExpanded?: boolean
+  setIsExpanded: (expanded: boolean) => void; // Add setIsExpanded prop
 }
 
 export function GlobalSidebar({
@@ -43,8 +46,14 @@ export function GlobalSidebar({
   onDepartmentChange,
   currentDepartment,
   defaultExpanded = false,
+  setIsExpanded,
 }: GlobalSidebarProps) {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+  const [isHovered, setIsHovered] = useState(false); // New state for hover
+  const isExpanded = defaultExpanded; // Use defaultExpanded as the source of truth
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
 
   const departments = [
     {
@@ -174,77 +183,6 @@ export function GlobalSidebar({
   }
 
   const renderNavigationItems = () => {
-    if (currentDepartment === "content-studio") {
-      return (
-        <>
-          {/* Back to Dashboard */}
-          <div className="px-3 mb-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleItemClick("dashboard", "department")}
-              className={`w-full justify-start h-auto p-3 text-slate-300 hover:text-white hover:bg-slate-700/50 ${
-                !isExpanded ? "px-3" : ""
-              }`}
-            >
-              <Crown className={`h-5 w-5 ${!isExpanded ? "" : "mr-3"} flex-shrink-0 text-amber-400`} />
-              {isExpanded && (
-                <div className="flex-1 text-left">
-                  <div className="font-medium">Executive Dashboard</div>
-                  <div className="text-xs opacity-70">Strategic overview</div>
-                </div>
-              )}
-            </Button>
-          </div>
-
-          <Separator className="mx-3 mb-4 bg-slate-700" />
-
-          {/* Studio Sections */}
-          <div className="space-y-1 px-3">
-            {studioSections.map((section) => {
-              const Icon = section.icon
-              const isActive = activeSection === section.id
-              return (
-                <Button
-                  key={section.id}
-                  variant={isActive ? "secondary" : "ghost"}
-                  size="sm"
-                  className={`w-full justify-start h-auto p-3 ${
-                    isActive
-                      ? "bg-slate-700 text-white border-slate-600"
-                      : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-                  } ${!isExpanded ? "px-3" : ""}`}
-                  onClick={() => handleItemClick(section.id, "section")}
-                >
-                  <div className="relative">
-                    <Icon className={`h-5 w-5 ${!isExpanded ? "" : "mr-3"} flex-shrink-0`} />
-                    {section.count !== null && section.count > 0 && !isExpanded && (
-                      <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                        {section.count > 99 ? "99" : section.count}
-                      </div>
-                    )}
-                  </div>
-                  {isExpanded && (
-                    <>
-                      <div className="flex-1 text-left">
-                        <div className="font-medium">{section.name}</div>
-                        <div className="text-xs opacity-70">{section.description}</div>
-                      </div>
-                      {section.count !== null && section.count > 0 && (
-                        <Badge variant="outline" className="ml-auto text-xs border-slate-600 text-slate-300">
-                          {section.count}
-                        </Badge>
-                      )}
-                    </>
-                  )}
-                </Button>
-              )
-            })}
-          </div>
-        </>
-      )
-    }
-
     // Default dashboard navigation
     return (
       <div className="space-y-1 px-3">
@@ -265,15 +203,15 @@ export function GlobalSidebar({
             >
               <div className="relative">
                 <Icon
-                  className={`h-5 w-5 ${!isExpanded ? "" : "mr-3"} flex-shrink-0 ${dept.restricted ? "text-amber-400" : ""}`}
+                  className={`h-5 w-5 ${!(isExpanded || isHovered) ? "" : "mr-3"} flex-shrink-0 ${dept.restricted ? "text-amber-400" : ""}`}
                 />
-                {dept.count !== null && dept.count > 0 && !isExpanded && (
+                {dept.count !== null && dept.count > 0 && !(isExpanded || isHovered) && (
                   <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {dept.count > 99 ? "99" : dept.count}
                   </div>
                 )}
               </div>
-              {isExpanded && (
+              {(isExpanded || isHovered) && (
                 <>
                   <div className="flex-1 text-left">
                     <div className="font-medium flex items-center">
@@ -299,8 +237,10 @@ export function GlobalSidebar({
   return (
     <div
       className={`${
-        isExpanded ? "w-80" : "w-16"
+        isExpanded || isHovered ? "w-80" : "w-16"
       } bg-slate-900/95 backdrop-blur-md border-r border-slate-700/50 shadow-2xl transition-all duration-300 ease-in-out flex flex-col relative z-40`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Header */}
       <div className="p-4 border-b border-slate-700/50">
@@ -326,7 +266,7 @@ export function GlobalSidebar({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => setIsExpanded(!defaultExpanded)}
             className="text-slate-400 hover:text-white ml-auto"
           >
             {isExpanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -373,8 +313,8 @@ export function GlobalSidebar({
               <p className="text-sm font-medium text-white">Alex Johnson</p>
               <p className="text-xs text-slate-400">Chief Executive</p>
             </div>
-            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-              <Settings className="h-4 w-4" />
+            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white" onClick={handleLogout}>
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         ) : (

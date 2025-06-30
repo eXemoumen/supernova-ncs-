@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { BarChart3, Users, DollarSign, MessageSquare, Settings, Sparkles } from "lucide-react"
@@ -12,6 +12,8 @@ import Support from "@/components/departments/support"
 import HR from "@/components/departments/hr"
 import Finance from "@/components/departments/finance"
 import Operations from "@/components/departments/operations"
+import AuthForm from "@/components/auth-form" // Import the AuthForm component
+import { supabase } from "../lib/supabaseClient" // Import supabase client
 
 const departments = [
   {
@@ -93,8 +95,26 @@ const departmentComponents = {
 }
 
 export default function Dashboard() {
+  const [session, setSession] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState("dashboard")
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false); // New state for sidebar expansion
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setLoading(false)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
+  }, []);
 
   const handleDepartmentChange = (departmentId: string) => {
     if (departmentId === "dashboard") {
@@ -104,6 +124,14 @@ export default function Dashboard() {
       setSelectedDepartment(departmentId)
       setActiveSection("workspace") // Default section for departments
     }
+  }
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen bg-gray-100">Loading...</div>
+  }
+
+  if (!session) {
+    return <AuthForm />
   }
 
   if (selectedDepartment) {
@@ -117,7 +145,8 @@ export default function Dashboard() {
             onSectionChange={setActiveSection}
             onDepartmentChange={handleDepartmentChange}
             currentDepartment={selectedDepartment}
-            defaultExpanded={false}
+            defaultExpanded={isSidebarExpanded}
+            setIsExpanded={setIsSidebarExpanded}
           />
           <div className="flex-1">
             <DepartmentComponent
@@ -135,11 +164,13 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <GlobalSidebar
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        onDepartmentChange={handleDepartmentChange}
-        currentDepartment={selectedDepartment}
-      />
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            onDepartmentChange={handleDepartmentChange}
+            currentDepartment={selectedDepartment}
+            defaultExpanded={isSidebarExpanded}
+            setIsExpanded={setIsSidebarExpanded}
+          />
 
       <div className="flex-1 flex flex-col">
         {/* Header */}

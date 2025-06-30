@@ -142,57 +142,41 @@ export default function ContentStudio({
   const [searchQuery, setSearchQuery] = useState("")
   const { toast } = useToast()
 
-  const clients = [
-    {
-      id: "1",
-      name: "TechCorp Inc.",
-      industry: "Enterprise Technology",
-      avatar: "/placeholder.svg?height=40&width=40",
-      tier: "Enterprise",
-      projects: 12,
-      satisfaction: 4.9,
-    },
-    {
-      id: "2",
-      name: "StartupXYZ",
-      industry: "Business Consulting",
-      avatar: "/placeholder.svg?height=40&width=40",
-      tier: "Growth",
-      projects: 8,
-      satisfaction: 4.7,
-    },
-    {
-      id: "3",
-      name: "Fashion Forward",
-      industry: "Fashion & Retail",
-      avatar: "/placeholder.svg?height=40&width=40",
-      tier: "Premium",
-      projects: 15,
-      satisfaction: 4.8,
-    },
-    {
-      id: "4",
-      name: "HealthPlus",
-      industry: "Healthcare Technology",
-      avatar: "/placeholder.svg?height=40&width=40",
-      tier: "Enterprise",
-      projects: 6,
-      satisfaction: 5.0,
-    },
-  ]
+  const [clients, setClients] = useState<any[]>([]);
+  const [niches, setNiches] = useState<any[]>([]);
+  const [loadingClients, setLoadingClients] = useState(true);
+  const [loadingNiches, setLoadingNiches] = useState(true);
 
-  const niches = [
-    { value: "technology", label: "Technology & Innovation", icon: "💻" },
-    { value: "healthcare", label: "Healthcare & Medical", icon: "🏥" },
-    { value: "finance", label: "Finance & FinTech", icon: "💰" },
-    { value: "education", label: "Education & E-Learning", icon: "📚" },
-    { value: "ecommerce", label: "E-commerce & Retail", icon: "🛒" },
-    { value: "fashion", label: "Fashion & Lifestyle", icon: "👗" },
-    { value: "food", label: "Food & Beverage", icon: "🍽️" },
-    { value: "travel", label: "Travel & Tourism", icon: "✈️" },
-    { value: "realestate", label: "Real Estate", icon: "🏠" },
-    { value: "consulting", label: "Business Consulting", icon: "📊" },
-  ]
+  useEffect(() => {
+    const fetchClients = async () => {
+      setLoadingClients(true);
+      try {
+        const response = await fetch("/api/clients");
+        const data = await response.json();
+        setClients(data);
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      } finally {
+        setLoadingClients(false);
+      }
+    };
+
+    const fetchNiches = async () => {
+      setLoadingNiches(true);
+      try {
+        const response = await fetch("/api/niches");
+        const data = await response.json();
+        setNiches(data);
+      } catch (error) {
+        console.error("Error fetching niches:", error);
+      } finally {
+        setLoadingNiches(false);
+      }
+    };
+
+    fetchClients();
+    fetchNiches();
+  }, []);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() && attachedFiles.length === 0) return
