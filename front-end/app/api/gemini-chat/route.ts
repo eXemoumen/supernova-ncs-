@@ -1,9 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(req: Request) {
   try {
-    const { message, context, client, niche } = await req.json();
+    const { message, context, clientId } = await req.json();
 
     if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
@@ -17,7 +18,29 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const systemPrompt = `You are an AI Marketing Strategist for OmniDesk. Your goal is to provide insightful and actionable marketing advice.\n    Consider the following context for your responses:\n    - Client: ${client || "Not specified"}\n    - Niche: ${niche || "Not specified"}\n    - Marketing Brief: ${context || "No specific brief provided."}\n\n    Always be professional, concise, and helpful. Focus on marketing strategies, campaign ideas, content suggestions, and performance analysis.`;
+    let clientName = "Not specified";
+    let clientNiche = "Not specified";
+    let clientIndustry = "Not specified";
+    let clientNotes = "No specific notes provided.";
+
+    if (clientId) {
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+
+      if (clientError) {
+        console.error("Error fetching client data:", clientError);
+      } else if (clientData) {
+        clientName = clientData.name || clientName;
+        clientNiche = clientData.niche || clientNiche;
+        clientIndustry = clientData.industry || clientIndustry;
+        clientNotes = clientData.notes || clientNotes;
+      }
+    }
+
+    const systemPrompt = `You are an AI Marketing Strategist for OmniDesk. Your goal is to provide insightful and actionable marketing advice.\n    Consider the following context for your responses:\n    - Client Name: ${clientName}\n    - Client Niche: ${clientNiche}\n    - Client Industry: ${clientIndustry}\n    - Client Notes: ${clientNotes}\n    - Marketing Brief: ${context || "No specific brief provided."}\n\n    Always be professional, concise, and helpful. Focus on marketing strategies, campaign ideas, content suggestions, and performance analysis.`;
 
     const chat = model.startChat({
       history: [

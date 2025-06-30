@@ -16,7 +16,11 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PlusCircle } from "lucide-react"
 
- function AddClientForm() {
+ interface AddClientFormProps {
+  onClientAdded?: () => void;
+}
+
+function AddClientForm({ onClientAdded }: AddClientFormProps) {
   const [clientName, setClientName] = useState("")
   const [clientNiche, setClientNiche] = useState("")
   const [contactPerson, setContactPerson] = useState("")
@@ -24,24 +28,52 @@ import { PlusCircle } from "lucide-react"
   const [notes, setNotes] = useState("")
   const [open, setOpen] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically send this data to your backend API
-    console.log({
-      clientName,
-      clientNiche,
-      contactPerson,
-      contactEmail,
-      notes,
-    })
-    alert("Client added successfully! (Data logged to console)")
-    // Reset form and close dialog
-    setClientName("")
-    setClientNiche("")
-    setContactPerson("")
-    setContactEmail("")
-    setNotes("")
-    setOpen(false)
+
+    const payload = {
+      name: clientName,
+      niche: clientNiche,
+      contact_person: contactPerson,
+      contact_email: contactEmail,
+      notes: notes,
+      // Add dummy values for industry, satisfaction, tier for now
+      industry: "", // This should ideally come from a selection or be inferred
+      satisfaction: 0, // Default value
+      tier: "", // Default value
+    }
+
+    try {
+      const response = await fetch("/api/clients", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log("Client added successfully:", data)
+      alert("Client added successfully!")
+
+      // Reset form and close dialog
+      setClientName("")
+      setClientNiche("")
+      setContactPerson("")
+      setContactEmail("")
+      setNotes("")
+      setOpen(false)
+      if (onClientAdded) {
+        onClientAdded();
+      }
+    } catch (error: any) {
+      console.error("Error adding client:", error)
+      alert(`Failed to add client: ${error.message}`)
+    }
   }
 
   return (

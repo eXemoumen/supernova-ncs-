@@ -1,27 +1,37 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { X, Send, Bot, User, Sparkles } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { X, Send, Bot, User, Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface DepartmentChatbotProps {
-  department: string
-  onClose: () => void
-  specialization: string
+  department: string;
+  onCloseAction: () => void;
+  specialization: string;
 }
 
 interface Message {
-  id: string
-  type: "user" | "ai"
-  content: string
-  timestamp: Date
+  id: string;
+  type: "user" | "ai";
+  content: string;
+  timestamp: Date;
 }
 
-export function DepartmentChatbot({ department, onClose, specialization }: DepartmentChatbotProps) {
+export function DepartmentChatbot({
+  department,
+  onCloseAction,
+  specialization,
+}: DepartmentChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -29,52 +39,52 @@ export function DepartmentChatbot({ department, onClose, specialization }: Depar
       content: `Hello! I'm your specialized AI assistant for ${department}. I can help you with ${specialization}. What would you like to work on today?`,
       timestamp: new Date(),
     },
-  ])
-  const [input, setInput] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const { toast } = useToast()
-  const [uniqueId, setUniqueId] = useState("")
+  ]);
+  const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const { toast } = useToast();
+  const [uniqueId, setUniqueId] = useState("");
 
   useEffect(() => {
     setUniqueId(`user-${messages.length}-${Date.now()}`);
-  }, [messages.length])
+  }, [messages.length]);
 
   const handleSend = async () => {
-    if (!input.trim()) return
+    if (!input.trim()) return;
 
     const userMessage: Message = {
       id: uniqueId,
       type: "user",
       content: input,
       timestamp: new Date(),
-    }
+    };
 
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsTyping(true)
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
 
     // Simulate AI response based on department
     setTimeout(() => {
-      let aiResponse = ""
+      let aiResponse = "";
 
       switch (department.toLowerCase()) {
         case "marketing":
-          aiResponse = `Great question about "${input}"! For marketing, I recommend focusing on data-driven strategies. Would you like me to help you create a campaign plan or analyze your current metrics?`
-          break
+          aiResponse = `Great question about "${input}"! For marketing, I recommend focusing on data-driven strategies. Would you like me to help you create a campaign plan or analyze your current metrics?`;
+          break;
         case "support":
-          aiResponse = `I understand you need help with "${input}". For customer support, I can help you draft responses, categorize tickets, or suggest resolution strategies. What specific aspect would you like to focus on?`
-          break
+          aiResponse = `I understand you need help with "${input}". For customer support, I can help you draft responses, categorize tickets, or suggest resolution strategies. What specific aspect would you like to focus on?`;
+          break;
         case "hr":
-          aiResponse = `Regarding "${input}" in HR management, I can assist with employee onboarding processes, performance evaluation frameworks, or recruitment strategies. Which area interests you most?`
-          break
+          aiResponse = `Regarding "${input}" in HR management, I can assist with employee onboarding processes, performance evaluation frameworks, or recruitment strategies. Which area interests you most?`;
+          break;
         case "finance":
-          aiResponse = `For your finance query about "${input}", I can help with budget analysis, expense categorization, or financial reporting. Would you like me to create a financial template or analyze spending patterns?`
-          break
+          aiResponse = `For your finance query about "${input}", I can help with budget analysis, expense categorization, or financial reporting. Would you like me to create a financial template or analyze spending patterns?`;
+          break;
         case "operations":
-          aiResponse = `Your operations question about "${input}" is interesting! I can help optimize workflows, create process documentation, or suggest automation opportunities. What's your priority?`
-          break
+          aiResponse = `Your operations question about "${input}" is interesting! I can help optimize workflows, create process documentation, or suggest automation opportunities. What's your priority?`;
+          break;
         default:
-          aiResponse = `I can help you with "${input}". Let me provide some specialized insights for your ${department} department.`
+          aiResponse = `I can help you with "${input}". Let me provide some specialized insights for your ${department} department.`;
       }
 
       const aiMessage: Message = {
@@ -82,11 +92,11 @@ export function DepartmentChatbot({ department, onClose, specialization }: Depar
         type: "ai",
         content: aiResponse,
         timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, aiMessage])
-      setIsTyping(false)
-    }, 1500)
-  }
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+      setIsTyping(false);
+    }, 1500);
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -99,9 +109,11 @@ export function DepartmentChatbot({ department, onClose, specialization }: Depar
               </div>
               <span>{department} AI Assistant</span>
             </CardTitle>
-            <CardDescription>Specialized AI for {specialization}</CardDescription>
+            <CardDescription>
+              Specialized AI for {specialization}
+            </CardDescription>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onCloseAction}>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
@@ -110,12 +122,25 @@ export function DepartmentChatbot({ department, onClose, specialization }: Depar
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                key={message.id}
+                className={`flex ${
+                  message.type === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
                 <div
-                  className={`flex items-start space-x-2 max-w-[80%] ${message.type === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
+                  className={`flex items-start space-x-2 max-w-[80%] ${
+                    message.type === "user"
+                      ? "flex-row-reverse space-x-reverse"
+                      : ""
+                  }`}
                 >
                   <div
-                    className={`p-2 rounded-full ${message.type === "user" ? "bg-blue-600" : "bg-gradient-to-r from-purple-500 to-pink-500"}`}
+                    className={`p-2 rounded-full ${
+                      message.type === "user"
+                        ? "bg-blue-600"
+                        : "bg-gradient-to-r from-purple-500 to-pink-500"
+                    }`}
                   >
                     {message.type === "user" ? (
                       <User className="h-4 w-4 text-white" />
@@ -124,10 +149,20 @@ export function DepartmentChatbot({ department, onClose, specialization }: Depar
                     )}
                   </div>
                   <div
-                    className={`p-3 rounded-lg ${message.type === "user" ? "bg-blue-600 text-white" : "bg-gradient-to-r from-slate-100 to-slate-50 text-slate-900 border"}`}
+                    className={`p-3 rounded-lg ${
+                      message.type === "user"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gradient-to-r from-slate-100 to-slate-50 text-slate-900 border"
+                    }`}
                   >
                     <p className="text-sm">{message.content}</p>
-                    <p className={`text-xs mt-1 ${message.type === "user" ? "text-blue-100" : "text-slate-500"}`}>
+                    <p
+                      className={`text-xs mt-1 ${
+                        message.type === "user"
+                          ? "text-blue-100"
+                          : "text-slate-500"
+                      }`}
+                    >
                       {message.timestamp.toLocaleTimeString()}
                     </p>
                   </div>
@@ -187,5 +222,5 @@ export function DepartmentChatbot({ department, onClose, specialization }: Depar
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

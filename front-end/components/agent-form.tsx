@@ -20,17 +20,56 @@ export function AgentForm({ department, onClose }: AgentFormProps) {
   const [isRunning, setIsRunning] = useState(false)
   const { toast } = useToast()
 
+  const [moduleType, setModuleType] = useState("")
+  const [priority, setPriority] = useState("")
+  const [budget, setBudget] = useState<number | string>("")
+  const [targetAudience, setTargetAudience] = useState("")
+  const [schedule, setSchedule] = useState("")
+  const [outputFormat, setOutputFormat] = useState("")
+  const [instructions, setInstructions] = useState("")
+
   const handleRun = async () => {
     setIsRunning(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsRunning(false)
+    const payload = {
+      department: typeof department === "string" ? department : department.name,
+      module_type: moduleType,
+      priority,
+      budget: Number(budget),
+      target_audience: targetAudience,
+      schedule,
+      output_format: outputFormat,
+      instructions,
+    }
+
+    try {
+      const response = await fetch("/api/agent/run", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
       toast({
         title: "AI Module Started",
-        description: "Your AI agent is now processing the task.",
+        description: data.message || "Your AI agent is now processing the task.",
       })
-    }, 2000)
+    } catch (error: any) {
+      console.error("Error initiating AI run:", error)
+      toast({
+        title: "Failed to Start AI Module",
+        description: error.message || "There was an error processing your request.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsRunning(false)
+    }
   }
 
   const handleSave = () => {
@@ -61,7 +100,7 @@ export function AgentForm({ department, onClose }: AgentFormProps) {
           <div className="space-y-4">
             <div>
               <Label htmlFor="module-type">Module Type</Label>
-              <Select>
+              <Select value={moduleType} onValueChange={setModuleType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select module type" />
                 </SelectTrigger>
@@ -75,7 +114,7 @@ export function AgentForm({ department, onClose }: AgentFormProps) {
 
             <div>
               <Label htmlFor="priority">Priority Level</Label>
-              <Select>
+              <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
@@ -89,19 +128,19 @@ export function AgentForm({ department, onClose }: AgentFormProps) {
 
             <div>
               <Label htmlFor="budget">Budget Limit ($)</Label>
-              <Input id="budget" type="number" placeholder="100" />
+              <Input id="budget" type="number" placeholder="100" value={budget} onChange={(e) => setBudget(e.target.value)} />
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
               <Label htmlFor="target-audience">Target Audience</Label>
-              <Input id="target-audience" placeholder="e.g., Young professionals, 25-35" />
+              <Input id="target-audience" placeholder="e.g., Young professionals, 25-35" value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} />
             </div>
 
             <div>
               <Label htmlFor="schedule">Schedule</Label>
-              <Select>
+              <Select value={schedule} onValueChange={setSchedule}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select schedule" />
                 </SelectTrigger>
@@ -116,7 +155,7 @@ export function AgentForm({ department, onClose }: AgentFormProps) {
 
             <div>
               <Label htmlFor="output-format">Output Format</Label>
-              <Select>
+              <Select value={outputFormat} onValueChange={setOutputFormat}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select format" />
                 </SelectTrigger>
@@ -136,6 +175,8 @@ export function AgentForm({ department, onClose }: AgentFormProps) {
             id="instructions"
             placeholder="Provide specific instructions for the AI module..."
             className="min-h-[100px]"
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
           />
         </div>
 

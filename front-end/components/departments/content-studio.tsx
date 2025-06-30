@@ -1,14 +1,26 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { useState, useEffect } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   BarChart3,
   MessageSquare,
@@ -49,45 +61,55 @@ import {
   Loader2,
   ArrowLeft,
   Sparkles, // Added for Content Studio icon
-} from "lucide-react"
+} from "lucide-react";
 
-import { DepartmentChatbot } from "@/components/department-chatbot"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useToast } from "@/hooks/use-toast"
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { AgentForm } from "@/components/agent-form"
+import { DepartmentChatbot } from "@/components/department-chatbot";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import {
+  LineChart as RechartsLineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { AgentForm } from "@/components/agent-form";
 
-interface ContentStudioProps { // Renamed from MarketingProps
-  onBack: () => void
-  department: any
-  activeSection?: string
-  onSectionChange?: (section: string) => void
+interface ContentStudioProps {
+  // Renamed from MarketingProps
+  onBackAction: () => void;
+  department: any;
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
 }
 
 interface ChatMessage {
-  id: string
-  type: "user" | "ai"
-  content: string
-  timestamp: Date
-  attachments?: string[]
+  id: string;
+  type: "user" | "ai";
+  content: string;
+  timestamp: Date;
+  attachments?: string[];
 }
 
 interface Campaign {
-  id: number
-  name: string
-  status: "active" | "draft" | "completed"
-  performance: number
-  budget: string
-  startDate: string
-  endDate: string
-  targetAudience: string
-  channels: string[]
-  roi: number
-  client: string
-  niche: string
+  id: number;
+  name: string;
+  status: "active" | "draft" | "completed";
+  performance: number;
+  budget: string;
+  startDate: string;
+  endDate: string;
+  targetAudience: string;
+  channels: string[];
+  roi: number;
+  client: string;
+  niche: string;
 }
 
-interface ContentPiece { // Renamed from ContentIdea
+interface ContentPiece {
+  // Renamed from ContentIdea
   id: string;
   title: string;
   type: "blog" | "social" | "email" | "video" | "article" | "other"; // Added 'article' for flexibility
@@ -106,12 +128,14 @@ interface MarketingDataPoint {
   niche: string;
 }
 
-export default function ContentStudio({ // Renamed from Marketing
-  onBack,
+export default function ContentStudio({
+  // Renamed from Marketing
+  onBackAction,
   department,
   activeSection = "dashboard",
   onSectionChange,
-}: ContentStudioProps) { // Renamed from MarketingProps
+}: ContentStudioProps) {
+  // Renamed from MarketingProps
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       id: "1",
@@ -126,19 +150,44 @@ export default function ContentStudio({ // Renamed from Marketing
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [contextData, setContextData] = useState("");
   const [topicPrompt, setTopicPrompt] = useState(""); // This will be for content piece generation now
-  const [generatedContentIdeas, setGeneratedContentIdeas] = useState<ContentPiece[]>([]); // Renamed from generatedTopics
-  const [approvedContentIdeas, setApprovedContentIdeas] = useState<ContentPiece[]>([]); // Renamed from approvedTopics
+  const [generatedContentIdeas, setGeneratedContentIdeas] = useState<
+    ContentPiece[]
+  >([]); // Renamed from generatedTopics
+  const [approvedContentIdeas, setApprovedContentIdeas] = useState<
+    ContentPiece[]
+  >([]); // Renamed from approvedTopics
   const [isGeneratingTopics, setIsGeneratingTopics] = useState(false); // Renamed from isGeneratingTopics
   const [generatedCampaigns, setGeneratedCampaigns] = useState<Campaign[]>([]);
   const [isGeneratingCampaigns, setIsGeneratingCampaigns] = useState(false);
   const { toast } = useToast();
 
-  const [selectedClient, setSelectedClient] = useState("")
-  const [selectedNiche, setSelectedNiche] = useState("")
+  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedNiche, setSelectedNiche] = useState("");
   const [clients, setClients] = useState<any[]>([
-    { id: "client-a", name: "Client A", avatar: "/placeholder-user.jpg", industry: "Tech", satisfaction: 4.5, tier: "Premium" },
-    { id: "client-b", name: "Client B", avatar: "/placeholder-user.jpg", industry: "Retail", satisfaction: 3.8, tier: "Standard" },
-    { id: "client-c", name: "Client C", avatar: "/placeholder-user.jpg", industry: "Healthcare", satisfaction: 4.9, tier: "Enterprise" },
+    {
+      id: "client-a",
+      name: "Client A",
+      avatar: "/placeholder-user.jpg",
+      industry: "Tech",
+      satisfaction: 4.5,
+      tier: "Premium",
+    },
+    {
+      id: "client-b",
+      name: "Client B",
+      avatar: "/placeholder-user.jpg",
+      industry: "Retail",
+      satisfaction: 3.8,
+      tier: "Standard",
+    },
+    {
+      id: "client-c",
+      name: "Client C",
+      avatar: "/placeholder-user.jpg",
+      industry: "Healthcare",
+      satisfaction: 4.9,
+      tier: "Enterprise",
+    },
   ]);
   const [niches, setNiches] = useState<any[]>([
     { value: "Digital Marketing", label: "Digital Marketing", icon: "📊" },
@@ -152,23 +201,29 @@ export default function ContentStudio({ // Renamed from Marketing
   const [contentIdeas, setContentIdeas] = useState<ContentPiece[]>([]); // Changed type to ContentPiece
   const [marketingData, setMarketingData] = useState<MarketingDataPoint[]>([]);
 
-  const filteredCampaigns = campaigns.filter(campaign => {
-    return (!selectedClient || campaign.client === selectedClient) &&
-           (!selectedNiche || campaign.niche === selectedNiche);
+  const filteredCampaigns = campaigns.filter((campaign) => {
+    return (
+      (!selectedClient || campaign.client === selectedClient) &&
+      (!selectedNiche || campaign.niche === selectedNiche)
+    );
   });
 
-  const filteredContentIdeas = contentIdeas.filter(idea => {
-    return (!selectedClient || idea.client === selectedClient) &&
-           (!selectedNiche || idea.niche === selectedNiche);
+  const filteredContentIdeas = contentIdeas.filter((idea) => {
+    return (
+      (!selectedClient || idea.client === selectedClient) &&
+      (!selectedNiche || idea.niche === selectedNiche)
+    );
   });
 
-  const filteredMarketingData = marketingData.filter(dataPoint => {
-    return (!selectedClient || dataPoint.client === selectedClient) &&
-           (!selectedNiche || dataPoint.niche === selectedNiche);
+  const filteredMarketingData = marketingData.filter((dataPoint) => {
+    return (
+      (!selectedClient || dataPoint.client === selectedClient) &&
+      (!selectedNiche || dataPoint.niche === selectedNiche)
+    );
   });
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() && attachedFiles.length === 0) return
+    if (!inputMessage.trim() && attachedFiles.length === 0) return;
 
     const userMessage: ChatMessage = {
       id: `user-${chatMessages.length}-${Date.now()}`,
@@ -176,15 +231,16 @@ export default function ContentStudio({ // Renamed from Marketing
       content: inputMessage,
       timestamp: new Date(),
       attachments: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
-    }
+    };
 
-    setChatMessages((prev) => [...prev, userMessage])
-    setInputMessage("")
-    setAttachedFiles([])
-    setIsTyping(true)
+    setChatMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
+    setAttachedFiles([]);
+    setIsTyping(true);
 
     try {
-      const response = await fetch("/api/content-studio-chat", { // Updated API endpoint
+      const response = await fetch("/api/content-studio-chat", {
+        // Updated API endpoint
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -214,23 +270,26 @@ export default function ContentStudio({ // Renamed from Marketing
       const errorMessage: ChatMessage = {
         id: `ai-error-${Date.now()}`,
         type: "ai",
-        content: "Sorry, I'm having trouble connecting to the AI. Please try again later.",
+        content:
+          "Sorry, I'm having trouble connecting to the AI. Please try again later.",
         timestamp: new Date(),
       };
       setChatMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
     }
-  }
+  };
 
-  const handleGenerateContentPieces = async () => { // Renamed from handleGenerateTopics
+  const handleGenerateContentPieces = async () => {
+    // Renamed from handleGenerateTopics
     if (!topicPrompt.trim()) return;
 
     setIsGeneratingTopics(true); // Keep this state name for now, will refactor later
     setGeneratedContentIdeas([]); // Clear previous content pieces
 
     try {
-      const response = await fetch("/api/generate-content-pieces", { // Updated API endpoint
+      const response = await fetch("/api/generate-content-pieces", {
+        // Updated API endpoint
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -248,17 +307,22 @@ export default function ContentStudio({ // Renamed from Marketing
       }
 
       const data = await response.json();
-      const parsedContentPieces = data.contentPieces.split('\n').map((line: string) => line.replace(/^\d+\.\s*/, '')).filter((line: string) => line.trim() !== '');
-      const newContentIdeas: ContentPiece[] = parsedContentPieces.map((piece: string) => ({
-        id: `piece-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        title: piece,
-        type: "other", // Default type, can be refined later
-        status: "new",
-        priority: "medium", // Default priority, can be refined later
-        client: selectedClient,
-        niche: selectedNiche,
-      }));
-      setGeneratedContentIdeas(prev => [...prev, ...newContentIdeas]);
+      const parsedContentPieces = data.contentPieces
+        .split("\n")
+        .map((line: string) => line.replace(/^\d+\.\s*/, ""))
+        .filter((line: string) => line.trim() !== "");
+      const newContentIdeas: ContentPiece[] = parsedContentPieces.map(
+        (piece: string) => ({
+          id: `piece-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          title: piece,
+          type: "other", // Default type, can be refined later
+          status: "new",
+          priority: "medium", // Default priority, can be refined later
+          client: selectedClient,
+          niche: selectedNiche,
+        })
+      );
+      setGeneratedContentIdeas((prev) => [...prev, ...newContentIdeas]);
     } catch (error) {
       console.error("Error generating content pieces:", error);
       toast({
@@ -272,16 +336,22 @@ export default function ContentStudio({ // Renamed from Marketing
   };
 
   const handleApproveIdea = (id: string) => {
-    setGeneratedContentIdeas(prev => {
-      const ideaToApprove = prev.find(idea => idea.id === id);
+    setGeneratedContentIdeas((prev) => {
+      const ideaToApprove = prev.find((idea) => idea.id === id);
       if (ideaToApprove) {
-        const updatedIdea = { ...ideaToApprove, status: "approved" };
-        setApprovedContentIdeas(approvedPrev => [...approvedPrev, updatedIdea]);
+        const updatedIdea: ContentPiece = {
+          ...ideaToApprove,
+          status: "approved" as const,
+        };
+        setApprovedContentIdeas((approvedPrev) => [
+          ...approvedPrev,
+          updatedIdea,
+        ]);
         toast({
           title: "Content Piece Approved", // Updated toast message
-          description: `"${ideaToApprove.title}" has been approved.`, 
+          description: `"${ideaToApprove.title}" has been approved.`,
         });
-        return prev.filter(idea => idea.id !== id);
+        return prev.filter((idea) => idea.id !== id);
       }
       return prev;
     });
@@ -289,26 +359,26 @@ export default function ContentStudio({ // Renamed from Marketing
 
   const handleDeleteIdea = (id: string, section: "generated" | "approved") => {
     if (section === "generated") {
-      setGeneratedContentIdeas(prev => {
-        const ideaToDelete = prev.find(idea => idea.id === id);
+      setGeneratedContentIdeas((prev) => {
+        const ideaToDelete = prev.find((idea) => idea.id === id);
         if (ideaToDelete) {
           toast({
             title: "Content Piece Deleted", // Updated toast message
-            description: `"${ideaToDelete.title}" has been deleted.`, 
+            description: `"${ideaToDelete.title}" has been deleted.`,
           });
-          return prev.filter(idea => idea.id !== id);
+          return prev.filter((idea) => idea.id !== id);
         }
         return prev;
       });
     } else if (section === "approved") {
-      setApprovedContentIdeas(prev => {
-        const ideaToDelete = prev.find(idea => idea.id === id);
+      setApprovedContentIdeas((prev) => {
+        const ideaToDelete = prev.find((idea) => idea.id === id);
         if (ideaToDelete) {
           toast({
             title: "Content Piece Deleted", // Updated toast message
-            description: `"${ideaToDelete.title}" has been deleted from approved content pieces.`, 
+            description: `"${ideaToDelete.title}" has been deleted from approved content pieces.`,
           });
-          return prev.filter(idea => idea.id !== id);
+          return prev.filter((idea) => idea.id !== id);
         }
         return prev;
       });
@@ -316,13 +386,15 @@ export default function ContentStudio({ // Renamed from Marketing
   };
 
   const handleFileUpload = (type: string) => {
-    const fileName = `${type}-${Date.now()}.${type === "image" ? "jpg" : type === "video" ? "mp4" : "pdf"}`
-    setAttachedFiles((prev) => [...prev, fileName])
+    const fileName = `${type}-${Date.now()}.${
+      type === "image" ? "jpg" : type === "video" ? "mp4" : "pdf"
+    }`;
+    setAttachedFiles((prev) => [...prev, fileName]);
     toast({
       title: "File Attached Successfully",
       description: `${fileName} has been attached to your message.`,
-    })
-  }
+    });
+  };
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -332,18 +404,18 @@ export default function ContentStudio({ // Renamed from Marketing
       new: "bg-purple-500/20 text-purple-300 border-purple-500/30",
       "in-progress": "bg-orange-500/20 text-orange-300 border-orange-500/30",
       approved: "bg-green-500/20 text-green-300 border-green-500/30",
-    }
-    return colors[status as keyof typeof colors] || colors.active
-  }
+    };
+    return colors[status as keyof typeof colors] || colors.active;
+  };
 
   const getPriorityColor = (priority: string) => {
     const colors = {
       high: "bg-red-500/20 text-red-300 border-red-500/30",
       medium: "bg-amber-500/20 text-amber-300 border-amber-500/30",
       low: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    }
-    return colors[priority as keyof typeof colors] || colors.medium
-  }
+    };
+    return colors[priority as keyof typeof colors] || colors.medium;
+  };
 
   const renderMainContent = () => {
     switch (activeSection) {
@@ -357,7 +429,9 @@ export default function ContentStudio({ // Renamed from Marketing
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-slate-400">Approved Pieces</p>
-                      <p className="text-2xl font-bold text-white">{approvedContentIdeas.length}</p>
+                      <p className="text-2xl font-bold text-white">
+                        {approvedContentIdeas.length}
+                      </p>
                     </div>
                     <CheckCircle className="h-8 w-8 text-emerald-400" />
                   </div>
@@ -369,7 +443,9 @@ export default function ContentStudio({ // Renamed from Marketing
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-slate-400">Generated Pieces</p>
-                      <p className="text-2xl font-bold text-white">{generatedContentIdeas.length}</p>
+                      <p className="text-2xl font-bold text-white">
+                        {generatedContentIdeas.length}
+                      </p>
                     </div>
                     <PenTool className="h-8 w-8 text-purple-400" />
                   </div>
@@ -381,7 +457,8 @@ export default function ContentStudio({ // Renamed from Marketing
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-slate-400">Content Types</p>
-                      <p className="text-2xl font-bold text-white">5</p> {/* Placeholder */}
+                      <p className="text-2xl font-bold text-white">5</p>{" "}
+                      {/* Placeholder */}
                     </div>
                     <Layout className="h-8 w-8 text-blue-400" />
                   </div>
@@ -393,7 +470,8 @@ export default function ContentStudio({ // Renamed from Marketing
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-slate-400">Active Projects</p>
-                      <p className="text-2xl font-bold text-white">3</p> {/* Placeholder */}
+                      <p className="text-2xl font-bold text-white">3</p>{" "}
+                      {/* Placeholder */}
                     </div>
                     <Briefcase className="h-8 w-8 text-amber-400" />
                   </div>
@@ -408,7 +486,9 @@ export default function ContentStudio({ // Renamed from Marketing
                   <LineChart className="h-5 w-5 text-blue-400" />
                   <span>Content Performance Trends</span>
                 </CardTitle>
-                <CardDescription className="text-slate-400">Monthly overview of content engagement and reach</CardDescription>
+                <CardDescription className="text-slate-400">
+                  Monthly overview of content engagement and reach
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-80 flex items-center justify-center text-slate-400">
@@ -430,24 +510,34 @@ export default function ContentStudio({ // Renamed from Marketing
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-slate-400">Recent content pieces will appear here.</p>
+                  <p className="text-slate-400">
+                    Recent content pieces will appear here.
+                  </p>
                 </div>
-                <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700" onClick={() => onSectionChange?.("content-creation")}>
+                <Button
+                  className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => onSectionChange?.("content-creation")}
+                >
                   <PenTool className="h-4 w-4 mr-2" />
                   Generate New Content
                 </Button>
               </CardContent>
             </Card>
           </div>
-        )
+        );
 
       case "content-creation": // This section is now for generating content pieces
         return (
           <div className="space-y-6">
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">AI Content Generator</CardTitle>
-                <CardDescription className="text-slate-400">Generate content pieces (e.g., blog posts, social media updates)</CardDescription>
+                <CardTitle className="text-white">
+                  AI Content Generator
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Generate content pieces (e.g., blog posts, social media
+                  updates)
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Input
@@ -463,7 +553,8 @@ export default function ContentStudio({ // Renamed from Marketing
                 >
                   {isGeneratingTopics ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />{" "}
+                      Generating...
                     </>
                   ) : (
                     <>
@@ -477,18 +568,29 @@ export default function ContentStudio({ // Renamed from Marketing
 
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Generated Content Pieces</CardTitle>
-                <CardDescription className="text-slate-400">Review and approve AI-suggested content pieces</CardDescription>
+                <CardTitle className="text-white">
+                  Generated Content Pieces
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Review and approve AI-suggested content pieces
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {generatedContentIdeas.length > 0 ? (
                     generatedContentIdeas.map((idea) => (
-                      <Card key={idea.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                      <Card
+                        key={idea.id}
+                        className="p-4 bg-slate-900/50 rounded-lg border border-slate-700"
+                      >
                         <CardContent className="p-0">
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium text-white">{idea.title}</h4>
-                            <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
+                            <h4 className="font-medium text-white">
+                              {idea.title}
+                            </h4>
+                            <Badge className={getStatusColor(idea.status)}>
+                              {idea.status}
+                            </Badge>
                           </div>
                           <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
                             <span>Type: {idea.type}</span>
@@ -507,7 +609,9 @@ export default function ContentStudio({ // Renamed from Marketing
                               variant="outline"
                               size="sm"
                               className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600"
-                              onClick={() => handleDeleteIdea(idea.id, "generated")}
+                              onClick={() =>
+                                handleDeleteIdea(idea.id, "generated")
+                              }
                             >
                               <XCircle className="h-4 w-4 mr-2" /> Delete
                             </Button>
@@ -516,7 +620,9 @@ export default function ContentStudio({ // Renamed from Marketing
                       </Card>
                     ))
                   ) : (
-                    <p className="text-slate-400">No new content pieces. Generate some above!</p>
+                    <p className="text-slate-400">
+                      No new content pieces. Generate some above!
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -524,18 +630,29 @@ export default function ContentStudio({ // Renamed from Marketing
 
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Approved Content Pieces</CardTitle>
-                <CardDescription className="text-slate-400">Content pieces ready for development or publication</CardDescription>
+                <CardTitle className="text-white">
+                  Approved Content Pieces
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Content pieces ready for development or publication
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {approvedContentIdeas.length > 0 ? (
                     approvedContentIdeas.map((idea) => (
-                      <Card key={idea.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                      <Card
+                        key={idea.id}
+                        className="p-4 bg-slate-900/50 rounded-lg border border-slate-700"
+                      >
                         <CardContent className="p-0">
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium text-white">{idea.title}</h4>
-                            <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
+                            <h4 className="font-medium text-white">
+                              {idea.title}
+                            </h4>
+                            <Badge className={getStatusColor(idea.status)}>
+                              {idea.status}
+                            </Badge>
                           </div>
                           <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
                             <span>Type: {idea.type}</span>
@@ -545,7 +662,9 @@ export default function ContentStudio({ // Renamed from Marketing
                             variant="outline"
                             size="sm"
                             className="w-full bg-red-600 hover:bg-red-700 text-white border-red-600"
-                            onClick={() => handleDeleteIdea(idea.id, "approved")}
+                            onClick={() =>
+                              handleDeleteIdea(idea.id, "approved")
+                            }
                           >
                             <XCircle className="h-4 w-4 mr-2" /> Delete
                           </Button>
@@ -553,54 +672,67 @@ export default function ContentStudio({ // Renamed from Marketing
                       </Card>
                     ))
                   ) : (
-                    <p className="text-slate-400">No approved content pieces yet.</p>
+                    <p className="text-slate-400">
+                      No approved content pieces yet.
+                    </p>
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
-        )
+        );
 
       case "campaign-configuration": // This section will be for Content Studio specific configuration
         return (
           <div className="space-y-6">
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Content Studio Configuration</CardTitle>
-                <CardDescription className="text-slate-400">Configure AI module for content generation</CardDescription>
+                <CardTitle className="text-white">
+                  Content Studio Configuration
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Configure AI module for content generation
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <AgentForm department={department} onClose={onBack} />
+                <AgentForm department={department} onClose={onBackAction} />
               </CardContent>
             </Card>
           </div>
-        )
+        );
 
       default:
         return (
           <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-white">
-                <Sparkles className="h-5 w-5 text-purple-400" /> {/* Updated icon */}
+                <Sparkles className="h-5 w-5 text-purple-400" />{" "}
+                {/* Updated icon */}
                 <span>Content Studio Section</span>
               </CardTitle>
-              <CardDescription className="text-slate-400">This section is under development</CardDescription>
+              <CardDescription className="text-slate-400">
+                This section is under development
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-16">
                 <div className="p-4 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                  <Sparkles className="h-10 w-10 text-purple-400" /> {/* Updated icon */}
+                  <Sparkles className="h-10 w-10 text-purple-400" />{" "}
+                  {/* Updated icon */}
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Coming Soon</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Coming Soon
+                </h3>
                 <p className="text-slate-400 max-w-md mx-auto">
-                  This section is under development. Stay tuned for exciting new features!
+                  This section is under development. Stay tuned for exciting new
+                  features!
                 </p>
               </div>
             </CardContent>
           </Card>
-        )
+        );
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -610,12 +742,21 @@ export default function ContentStudio({ // Renamed from Marketing
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2.5 bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-600 rounded-xl shadow-lg"> {/* Updated colors */}
-                  <Sparkles className="h-5 w-5 text-white" /> {/* Updated icon */}
+                <div className="p-2.5 bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-600 rounded-xl shadow-lg">
+                  {" "}
+                  {/* Updated colors */}
+                  <Sparkles className="h-5 w-5 text-white" />{" "}
+                  {/* Updated icon */}
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-white">Content Studio</h1> {/* Updated title */}
-                  <p className="text-sm text-slate-400">AI-Powered Content Generation & Workflow</p> {/* Updated description */}
+                  <h1 className="text-xl font-semibold text-white">
+                    Content Studio
+                  </h1>{" "}
+                  {/* Updated title */}
+                  <p className="text-sm text-slate-400">
+                    AI-Powered Content Generation & Workflow
+                  </p>{" "}
+                  {/* Updated description */}
                 </div>
               </div>
             </div>
@@ -624,16 +765,19 @@ export default function ContentStudio({ // Renamed from Marketing
                 variant="outline"
                 size="sm"
                 className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700"
-                onClick={onBack}
+                onClick={onBackAction}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
               </Button>
-              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 font-medium"> {/* Updated colors */}
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 font-medium">
+                {" "}
+                {/* Updated colors */}
                 <Zap className="h-3 w-3 mr-1" />
                 AI Enabled
               </Badge>
               <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-medium">
-                {approvedContentIdeas.length} Approved Pieces {/* Updated text */}
+                {approvedContentIdeas.length} Approved Pieces{" "}
+                {/* Updated text */}
               </Badge>
               <Button
                 variant="outline"
@@ -651,7 +795,9 @@ export default function ContentStudio({ // Renamed from Marketing
         {/* Main Content Area */}
         <div className="flex-1 flex">
           {/* Content Area */}
-          <div className="flex-1 p-8 overflow-y-auto">{renderMainContent()}</div>
+          <div className="flex-1 p-8 overflow-y-auto">
+            {renderMainContent()}
+          </div>
 
           {/* AI Assistant Panel */}
           <div className="w-96 bg-slate-900/95 backdrop-blur-md border-l border-slate-700/50 shadow-lg flex flex-col">
@@ -659,28 +805,47 @@ export default function ContentStudio({ // Renamed from Marketing
             <div className="p-6 border-b border-slate-700/50">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="client-select-ai" className="text-sm font-medium text-slate-300 mb-2 block">
+                  <Label
+                    htmlFor="client-select-ai"
+                    className="text-sm font-medium text-slate-300 mb-2 block"
+                  >
                     Select Client
                   </Label>
-                  <Select value={selectedClient || ""} onValueChange={setSelectedClient}>
-                    <SelectTrigger id="client-select-ai" className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400">
+                  <Select
+                    value={selectedClient || ""}
+                    onValueChange={setSelectedClient}
+                  >
+                    <SelectTrigger
+                      id="client-select-ai"
+                      className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400"
+                    >
                       <SelectValue placeholder="Choose a client" />
                     </SelectTrigger>
                     <SelectContent className="border-slate-600 bg-slate-800">
                       {clients.length === 0 ? (
-                        <SelectItem value="no-clients" disabled>No clients available</SelectItem>
+                        <SelectItem value="no-clients" disabled>
+                          No clients available
+                        </SelectItem>
                       ) : (
                         clients.map((client) => (
-                          <SelectItem key={client.id} value={client.name} className="py-3 text-white">
+                          <SelectItem
+                            key={client.id}
+                            value={client.name}
+                            className="py-3 text-white"
+                          >
                             <div className="flex items-center space-x-3 w-full">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={client.avatar || "/placeholder.svg"} />
+                                <AvatarImage
+                                  src={client.avatar || "/placeholder.svg"}
+                                />
                                 <AvatarFallback className="bg-blue-600 text-white text-xs font-medium">
                                   {client.name.slice(0, 2)}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
-                                <div className="font-medium text-white">{client.name}</div>
+                                <div className="font-medium text-white">
+                                  {client.name}
+                                </div>
                                 <div className="text-xs text-slate-400 flex items-center space-x-2">
                                   <span>{client.industry}</span>
                                   <span>•</span>
@@ -690,7 +855,10 @@ export default function ContentStudio({ // Renamed from Marketing
                                   </span>
                                 </div>
                               </div>
-                              <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                              <Badge
+                                variant="outline"
+                                className="text-xs border-slate-600 text-slate-300"
+                              >
                                 {client.tier}
                               </Badge>
                             </div>
@@ -702,19 +870,34 @@ export default function ContentStudio({ // Renamed from Marketing
                 </div>
 
                 <div>
-                  <Label htmlFor="niche-select-ai" className="text-sm font-medium text-slate-300 mb-2 block">
+                  <Label
+                    htmlFor="niche-select-ai"
+                    className="text-sm font-medium text-slate-300 mb-2 block"
+                  >
                     Select Niche
                   </Label>
-                  <Select value={selectedNiche || ""} onValueChange={setSelectedNiche}>
-                    <SelectTrigger id="niche-select-ai" className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400">
+                  <Select
+                    value={selectedNiche || ""}
+                    onValueChange={setSelectedNiche}
+                  >
+                    <SelectTrigger
+                      id="niche-select-ai"
+                      className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400"
+                    >
                       <SelectValue placeholder="Select a niche" />
                     </SelectTrigger>
                     <SelectContent className="border-slate-600 bg-slate-800">
                       {niches.length === 0 ? (
-                        <SelectItem value="no-niches" disabled>No niches available</SelectItem>
+                        <SelectItem value="no-niches" disabled>
+                          No niches available
+                        </SelectItem>
                       ) : (
                         niches.map((niche) => (
-                          <SelectItem key={niche.value} value={niche.value} className="py-2 text-white">
+                          <SelectItem
+                            key={niche.value}
+                            value={niche.value}
+                            className="py-2 text-white"
+                          >
                             <div className="flex items-center space-x-2">
                               <span className="text-lg">{niche.icon}</span>
                               <span className="font-medium">{niche.label}</span>
@@ -730,12 +913,20 @@ export default function ContentStudio({ // Renamed from Marketing
             {/* AI Assistant Header */}
             <div className="p-6 border-b border-slate-700/50">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg"> {/* Updated colors */}
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg">
+                  {" "}
+                  {/* Updated colors */}
                   <Bot className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">AI Content Assistant</h3> {/* Updated title */}
-                  <p className="text-sm text-slate-400">Your intelligent content creation partner</p> {/* Updated description */}
+                  <h3 className="text-lg font-semibold text-white">
+                    AI Content Assistant
+                  </h3>{" "}
+                  {/* Updated title */}
+                  <p className="text-sm text-slate-400">
+                    Your intelligent content creation partner
+                  </p>{" "}
+                  {/* Updated description */}
                 </div>
               </div>
             </div>
@@ -744,7 +935,10 @@ export default function ContentStudio({ // Renamed from Marketing
             <div className="p-6 border-b border-slate-700/50">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="context-data" className="text-sm font-medium text-slate-300 mb-2 block">
+                  <Label
+                    htmlFor="context-data"
+                    className="text-sm font-medium text-slate-300 mb-2 block"
+                  >
                     Content Brief
                   </Label>
                   <Textarea
@@ -757,7 +951,9 @@ export default function ContentStudio({ // Renamed from Marketing
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-slate-300 mb-2 block">Attach Files</Label>
+                  <Label className="text-sm font-medium text-slate-300 mb-2 block">
+                    Attach Files
+                  </Label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { type: "document", label: "Doc", icon: FileText },
@@ -772,7 +968,9 @@ export default function ContentStudio({ // Renamed from Marketing
                         className="flex flex-col items-center p-3 h-auto border-slate-600 hover:border-blue-400 hover:bg-blue-500/20 bg-transparent text-slate-300"
                       >
                         <item.icon className="h-4 w-4 mb-1 text-slate-400" />
-                        <span className="text-xs font-medium">{item.label}</span>
+                        <span className="text-xs font-medium">
+                          {item.label}
+                        </span>
                       </Button>
                     ))}
                   </div>
@@ -787,12 +985,18 @@ export default function ContentStudio({ // Renamed from Marketing
                       >
                         <div className="flex items-center space-x-2">
                           <Paperclip className="h-3 w-3 text-slate-500" />
-                          <span className="text-xs text-slate-300 font-medium">{file}</span>
+                          <span className="text-xs text-slate-300 font-medium">
+                            {file}
+                          </span>
                         </div>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setAttachedFiles((prev) => prev.filter((_, i) => i !== index))}
+                          onClick={() =>
+                            setAttachedFiles((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            )
+                          }
                           className="h-5 w-5 p-0 text-slate-400 hover:text-red-400"
                         >
                           <XCircle className="h-3 w-3" />
@@ -808,9 +1012,18 @@ export default function ContentStudio({ // Renamed from Marketing
             <ScrollArea className="flex-1 p-6">
               <div className="space-y-4">
                 {chatMessages.map((message) => (
-                  <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.type === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
                     <div
-                      className={`flex items-start space-x-3 max-w-[85%] ${message.type === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
+                      className={`flex items-start space-x-3 max-w-[85%] ${
+                        message.type === "user"
+                          ? "flex-row-reverse space-x-reverse"
+                          : ""
+                      }`}
                     >
                       <Avatar className="h-7 w-7 flex-shrink-0">
                         {message.type === "user" ? (
@@ -818,7 +1031,9 @@ export default function ContentStudio({ // Renamed from Marketing
                             <User className="h-3 w-3" />
                           </AvatarFallback>
                         ) : (
-                          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white text-xs"> {/* Updated colors */}
+                          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white text-xs">
+                            {" "}
+                            {/* Updated colors */}
                             <Bot className="h-3 w-3" />
                           </AvatarFallback>
                         )}
@@ -830,14 +1045,18 @@ export default function ContentStudio({ // Renamed from Marketing
                             : "bg-slate-800/50 text-slate-300 border border-slate-700"
                         }`}
                       >
-                        <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        <p className="leading-relaxed whitespace-pre-wrap">
+                          {message.content}
+                        </p>
                         {message.attachments && (
                           <div className="mt-2 space-y-1">
                             {message.attachments.map((file, index) => (
                               <div
                                 key={index}
                                 className={`text-xs flex items-center space-x-1 ${
-                                  message.type === "user" ? "text-blue-200" : "text-slate-500"
+                                  message.type === "user"
+                                    ? "text-blue-200"
+                                    : "text-slate-500"
                                 }`}
                               >
                                 <Paperclip className="h-3 w-3" />
@@ -846,7 +1065,13 @@ export default function ContentStudio({ // Renamed from Marketing
                             ))}
                           </div>
                         )}
-                        <p className={`text-xs mt-2 ${message.type === "user" ? "text-blue-200" : "text-slate-500"}`}>
+                        <p
+                          className={`text-xs mt-2 ${
+                            message.type === "user"
+                              ? "text-blue-200"
+                              : "text-slate-500"
+                          }`}
+                        >
                           {message.timestamp.toLocaleTimeString()}
                         </p>
                       </div>
@@ -858,7 +1083,9 @@ export default function ContentStudio({ // Renamed from Marketing
                   <div className="flex justify-start">
                     <div className="flex items-start space-x-3">
                       <Avatar className="h-7 w-7">
-                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white"> {/* Updated colors */}
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white">
+                          {" "}
+                          {/* Updated colors */}
                           <Bot className="h-3 w-3" />
                         </AvatarFallback>
                       </Avatar>
@@ -889,13 +1116,21 @@ export default function ContentStudio({ // Renamed from Marketing
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     placeholder="Describe your content requirements..."
-                    onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && !e.shiftKey && handleSendMessage()
+                    }
                     className="flex-1 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400 text-sm"
                   />
                   <Button
                     onClick={handleSendMessage}
-                    disabled={!inputMessage.trim() && attachedFiles.length === 0 || isTyping}
-                    className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 px-4"> {/* Updated colors */}
+                    disabled={
+                      (!inputMessage.trim() && attachedFiles.length === 0) ||
+                      isTyping
+                    }
+                    className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 px-4"
+                  >
+                    {" "}
+                    {/* Updated colors */}
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
@@ -905,5 +1140,5 @@ export default function ContentStudio({ // Renamed from Marketing
         </div>
       </div>
     </div>
-  )
+  );
 }

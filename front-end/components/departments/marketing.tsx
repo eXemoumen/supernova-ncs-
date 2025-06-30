@@ -1,14 +1,26 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { useState, useEffect } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   BarChart3,
   MessageSquare,
@@ -48,42 +60,50 @@ import {
   Star,
   Loader2,
   ArrowLeft,
-} from "lucide-react"
+} from "lucide-react";
 
-import { DepartmentChatbot } from "@/components/department-chatbot"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { useToast } from "@/hooks/use-toast"
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { AgentForm } from "@/components/agent-form"
+import { DepartmentChatbot } from "@/components/department-chatbot";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import {
+  LineChart as RechartsLineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { AgentForm } from "@/components/agent-form";
 
 interface MarketingProps {
-  onBack: () => void
-  department: any
-  activeSection?: string
-  onSectionChange?: (section: string) => void
+  onBackAction: () => void;
+  department: any;
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
 }
 
 interface ChatMessage {
-  id: string
-  type: "user" | "ai"
-  content: string
-  timestamp: Date
-  attachments?: string[]
+  id: string;
+  type: "user" | "ai";
+  content: string;
+  timestamp: Date;
+  attachments?: string[];
 }
 
 interface Campaign {
-  id: number
-  name: string
-  status: "active" | "draft" | "completed"
-  performance: number
-  budget: string
-  startDate: string
-  endDate: string
-  targetAudience: string
-  channels: string[]
-  roi: number
-  client: string
-  niche: string
+  id: number;
+  name: string;
+  status: "active" | "draft" | "completed";
+  performance: number;
+  budget: string;
+  startDate: string;
+  endDate: string;
+  targetAudience: string;
+  channels: string[];
+  roi: number;
+  client: string;
+  niche: string;
 }
 
 interface ContentIdea {
@@ -106,9 +126,9 @@ interface MarketingDataPoint {
 }
 
 export default function Marketing({
-  onBack,
+  onBackAction,
   department,
-  activeSection = "dashboard",
+  activeSection = "campaign-management",
   onSectionChange,
 }: MarketingProps) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -125,49 +145,132 @@ export default function Marketing({
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [contextData, setContextData] = useState("");
   const [topicPrompt, setTopicPrompt] = useState("");
-  const [generatedContentIdeas, setGeneratedContentIdeas] = useState<ContentIdea[]>([]);
-  const [approvedContentIdeas, setApprovedContentIdeas] = useState<ContentIdea[]>([]);
+  const [generatedContentIdeas, setGeneratedContentIdeas] = useState<
+    ContentIdea[]
+  >([]);
+  const [approvedContentIdeas, setApprovedContentIdeas] = useState<
+    ContentIdea[]
+  >([]);
   const [isGeneratingTopics, setIsGeneratingTopics] = useState(false);
   const [generatedCampaigns, setGeneratedCampaigns] = useState<Campaign[]>([]);
   const [isGeneratingCampaigns, setIsGeneratingCampaigns] = useState(false);
   const { toast } = useToast();
 
-  const [selectedClient, setSelectedClient] = useState("")
-  const [selectedNiche, setSelectedNiche] = useState("")
-  const [clients, setClients] = useState<any[]>([
-    { id: "client-a", name: "Client A", avatar: "/placeholder-user.jpg", industry: "Tech", satisfaction: 4.5, tier: "Premium" },
-    { id: "client-b", name: "Client B", avatar: "/placeholder-user.jpg", industry: "Retail", satisfaction: 3.8, tier: "Standard" },
-    { id: "client-c", name: "Client C", avatar: "/placeholder-user.jpg", industry: "Healthcare", satisfaction: 4.9, tier: "Enterprise" },
-  ]);
-  const [niches, setNiches] = useState<any[]>([
-    { value: "Digital Marketing", label: "Digital Marketing", icon: "📊" },
-    { value: "Technology", label: "Technology", icon: "💻" },
-    { value: "Healthcare", label: "Healthcare", icon: "⚕️" },
-    { value: "Finance", label: "Finance", icon: "💰" },
-    { value: "Education", label: "Education", icon: "📚" },
-  ]);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [clients, setClients] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await fetch("/api/clients");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setClients(data);
+        if (data.length > 0) {
+          setSelectedClientId(data[0].id); // Select the first client by default
+        }
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load clients. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchClients();
+  }, []);
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [contentIdeas, setContentIdeas] = useState<ContentIdea[]>([]);
   const [marketingData, setMarketingData] = useState<MarketingDataPoint[]>([]);
 
-  const filteredCampaigns = campaigns.filter(campaign => {
-    return (!selectedClient || campaign.client === selectedClient) &&
-           (!selectedNiche || campaign.niche === selectedNiche);
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        const response = await fetch("/api/campaigns");
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setCampaigns(data);
+      } catch (error) {
+        console.error("Error fetching campaigns:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load campaigns.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const fetchContentIdeas = async () => {
+      try {
+        const response = await fetch("/api/content-ideas");
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setContentIdeas(data);
+      } catch (error) {
+        console.error("Error fetching content ideas:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load content ideas.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    const fetchMarketingData = async () => {
+      try {
+        const response = await fetch("/api/marketing-data");
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setMarketingData(data);
+      } catch (error) {
+        console.error("Error fetching marketing data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load marketing data.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchCampaigns();
+    fetchContentIdeas();
+    fetchMarketingData();
+  }, []);
+
+  const selectedClientData = clients.find(
+    (client) => client.id === selectedClientId
+  );
+
+  const filteredCampaigns = campaigns.filter((campaign) => {
+    return (
+      (!selectedClientData || campaign.client === selectedClientData.name) &&
+      (!selectedClientData || campaign.niche === selectedClientData.niche)
+    );
   });
 
-  const filteredContentIdeas = contentIdeas.filter(idea => {
-    return (!selectedClient || idea.client === selectedClient) &&
-           (!selectedNiche || idea.niche === selectedNiche);
+  const filteredContentIdeas = contentIdeas.filter((idea) => {
+    return (
+      (!selectedClientData || idea.client === selectedClientData.name) &&
+      (!selectedClientData || idea.niche === selectedClientData.niche)
+    );
   });
 
-  const filteredMarketingData = marketingData.filter(dataPoint => {
-    return (!selectedClient || dataPoint.client === selectedClient) &&
-           (!selectedNiche || dataPoint.niche === selectedNiche);
+  const filteredMarketingData = marketingData.filter((dataPoint) => {
+    return (
+      (!selectedClientData || dataPoint.client === selectedClientData.name) &&
+      (!selectedClientData || dataPoint.niche === selectedClientData.niche)
+    );
   });
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() && attachedFiles.length === 0) return
+    if (!inputMessage.trim() && attachedFiles.length === 0) return;
 
     const userMessage: ChatMessage = {
       id: `user-${chatMessages.length}-${Date.now()}`,
@@ -175,12 +278,12 @@ export default function Marketing({
       content: inputMessage,
       timestamp: new Date(),
       attachments: attachedFiles.length > 0 ? [...attachedFiles] : undefined,
-    }
+    };
 
-    setChatMessages((prev) => [...prev, userMessage])
-    setInputMessage("")
-    setAttachedFiles([])
-    setIsTyping(true)
+    setChatMessages((prev) => [...prev, userMessage]);
+    setInputMessage("");
+    setAttachedFiles([]);
+    setIsTyping(true);
 
     try {
       const response = await fetch("/api/gemini-chat", {
@@ -191,8 +294,8 @@ export default function Marketing({
         body: JSON.stringify({
           message: userMessage.content,
           context: contextData,
-          client: selectedClient,
-          niche: selectedNiche,
+          client: selectedClientData?.name,
+          niche: selectedClientData?.niche,
         }),
       });
 
@@ -213,14 +316,15 @@ export default function Marketing({
       const errorMessage: ChatMessage = {
         id: `ai-error-${Date.now()}`,
         type: "ai",
-        content: "Sorry, I'm having trouble connecting to the AI. Please try again later.",
+        content:
+          "Sorry, I'm having trouble connecting to the AI. Please try again later.",
         timestamp: new Date(),
       };
       setChatMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
     }
-  }
+  };
 
   const handleGenerateTopics = async () => {
     if (!topicPrompt.trim()) return;
@@ -236,8 +340,8 @@ export default function Marketing({
         },
         body: JSON.stringify({
           prompt: topicPrompt,
-          client: selectedClient,
-          niche: selectedNiche,
+          client: selectedClientData?.name,
+          niche: selectedClientData?.niche,
           brief: contextData,
         }),
       });
@@ -247,17 +351,22 @@ export default function Marketing({
       }
 
       const data = await response.json();
-      const parsedTopics = data.topics.split('\n').map((line: string) => line.replace(/^\d+\.\s*/, '')).filter((line: string) => line.trim() !== '');
-      const newContentIdeas: ContentIdea[] = parsedTopics.map((topic: string) => ({
-        id: `idea-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        title: topic,
-        type: "other", // Default type, can be refined later
-        status: "new",
-        priority: "medium", // Default priority, can be refined later
-        client: selectedClient,
-        niche: selectedNiche,
-      }));
-      setGeneratedContentIdeas(prev => [...prev, ...newContentIdeas]);
+      const parsedTopics = data.topics
+        .split("\n")
+        .map((line: string) => line.replace(/^\d+\.\s*/, ""))
+        .filter((line: string) => line.trim() !== "");
+      const newContentIdeas: ContentIdea[] = parsedTopics.map(
+        (topic: string) => ({
+          id: `idea-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          title: topic,
+          type: "other", // Default type, can be refined later
+          status: "new",
+          priority: "medium", // Default priority, can be refined later
+          client: selectedClientData?.name,
+          niche: selectedClientData?.niche,
+        })
+      );
+      setGeneratedContentIdeas((prev) => [...prev, ...newContentIdeas]);
     } catch (error) {
       console.error("Error generating topics:", error);
       toast({
@@ -271,16 +380,22 @@ export default function Marketing({
   };
 
   const handleApproveIdea = (id: string) => {
-    setGeneratedContentIdeas(prev => {
-      const ideaToApprove = prev.find(idea => idea.id === id);
+    setGeneratedContentIdeas((prev) => {
+      const ideaToApprove = prev.find((idea) => idea.id === id);
       if (ideaToApprove) {
-        const updatedIdea = { ...ideaToApprove, status: "approved" };
-        setApprovedContentIdeas(approvedPrev => [...approvedPrev, updatedIdea]);
+        const updatedIdea: ContentIdea = {
+          ...ideaToApprove,
+          status: "approved" as const,
+        };
+        setApprovedContentIdeas((approvedPrev) => [
+          ...approvedPrev,
+          updatedIdea,
+        ]);
         toast({
           title: "Idea Approved",
-          description: `"${ideaToApprove.title}" has been approved.`, 
+          description: `"${ideaToApprove.title}" has been approved.`,
         });
-        return prev.filter(idea => idea.id !== id);
+        return prev.filter((idea) => idea.id !== id);
       }
       return prev;
     });
@@ -288,26 +403,26 @@ export default function Marketing({
 
   const handleDeleteIdea = (id: string, section: "generated" | "approved") => {
     if (section === "generated") {
-      setGeneratedContentIdeas(prev => {
-        const ideaToDelete = prev.find(idea => idea.id === id);
+      setGeneratedContentIdeas((prev) => {
+        const ideaToDelete = prev.find((idea) => idea.id === id);
         if (ideaToDelete) {
           toast({
             title: "Idea Deleted",
-            description: `"${ideaToDelete.title}" has been deleted.`, 
+            description: `"${ideaToDelete.title}" has been deleted.`,
           });
-          return prev.filter(idea => idea.id !== id);
+          return prev.filter((idea) => idea.id !== id);
         }
         return prev;
       });
     } else if (section === "approved") {
-      setApprovedContentIdeas(prev => {
-        const ideaToDelete = prev.find(idea => idea.id === id);
+      setApprovedContentIdeas((prev) => {
+        const ideaToDelete = prev.find((idea) => idea.id === id);
         if (ideaToDelete) {
           toast({
             title: "Idea Deleted",
-            description: `"${ideaToDelete.title}" has been deleted from approved ideas.`, 
+            description: `"${ideaToDelete.title}" has been deleted from approved ideas.`,
           });
-          return prev.filter(idea => idea.id !== id);
+          return prev.filter((idea) => idea.id !== id);
         }
         return prev;
       });
@@ -315,13 +430,15 @@ export default function Marketing({
   };
 
   const handleFileUpload = (type: string) => {
-    const fileName = `${type}-${Date.now()}.${type === "image" ? "jpg" : type === "video" ? "mp4" : "pdf"}`
-    setAttachedFiles((prev) => [...prev, fileName])
+    const fileName = `${type}-${Date.now()}.${
+      type === "image" ? "jpg" : type === "video" ? "mp4" : "pdf"
+    }`;
+    setAttachedFiles((prev) => [...prev, fileName]);
     toast({
       title: "File Attached Successfully",
       description: `${fileName} has been attached to your message.`,
-    })
-  }
+    });
+  };
 
   const getStatusColor = (status: string) => {
     const colors = {
@@ -331,151 +448,31 @@ export default function Marketing({
       new: "bg-purple-500/20 text-purple-300 border-purple-500/30",
       "in-progress": "bg-orange-500/20 text-orange-300 border-orange-500/30",
       approved: "bg-green-500/20 text-green-300 border-green-500/30",
-    }
-    return colors[status as keyof typeof colors] || colors.active
-  }
+    };
+    return colors[status as keyof typeof colors] || colors.active;
+  };
 
   const getPriorityColor = (priority: string) => {
     const colors = {
       high: "bg-red-500/20 text-red-300 border-red-500/30",
       medium: "bg-amber-500/20 text-amber-300 border-amber-500/30",
       low: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    }
-    return colors[priority as keyof typeof colors] || colors.medium
-  }
+    };
+    return colors[priority as keyof typeof colors] || colors.medium;
+  };
 
   const renderMainContent = () => {
     switch (activeSection) {
-      case "dashboard":
-        return (
-          <div className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-400">Active Campaigns</p>
-                      <p className="text-2xl font-bold text-white">{filteredCampaigns.filter(c => c.status === 'active').length}</p>
-                    </div>
-                    <Target className="h-8 w-8 text-blue-400" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-400">Total ROI</p>
-                      <p className="text-2xl font-bold text-white">{filteredCampaigns.reduce((sum, c) => sum + c.roi, 0)}%</p>
-                    </div>
-                    <DollarSign className="h-8 w-8 text-green-400" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-400">Engagement Rate</p>
-                      <p className="text-2xl font-bold text-white">4.2%</p>
-                    </div>
-                    <TrendingUp className="h-8 w-8 text-purple-400" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-400">Content Ideas</p>
-                      <p className="text-2xl font-bold text-white">{filteredContentIdeas.length}</p>
-                    </div>
-                    <PenTool className="h-8 w-8 text-amber-400" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Campaign Performance Trends Chart */}
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center space-x-2">
-                  <LineChart className="h-5 w-5 text-blue-400" />
-                  <span>Marketing Performance Trends</span>
-                </CardTitle>
-                <CardDescription className="text-slate-400">Monthly overview of revenue, spend, and ROI</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RechartsLineChart data={filteredMarketingData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis dataKey="month" stroke="#9CA3AF" />
-                      <YAxis stroke="#9CA3AF" />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#1F2937",
-                          border: "1px solid #374151",
-                          borderRadius: "8px",
-                          color: "#F9FAFB",
-                        }}
-                      />
-                      <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={3} name="Revenue" />
-                      <Line type="monotone" dataKey="spend" stroke="#EF4444" strokeWidth={3} name="Spend" />
-                      <Line type="monotone" dataKey="roi" stroke="#10B981" strokeWidth={3} name="ROI" />
-                    </RechartsLineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Campaigns */}
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-blue-400" />
-                  <span>Recent Campaigns</span>
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                  Overview of your latest marketing campaigns
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {filteredCampaigns.map((campaign) => (
-                    <div key={campaign.id} className="p-4 border border-slate-700 rounded-lg bg-slate-900/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium text-white">{campaign.name}</h3>
-                        <Badge className={getStatusColor(campaign.status)}>
-                          {campaign.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-slate-400">
-                        <span>Performance: {campaign.performance}%</span>
-                        <span>Budget: {campaign.budget}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700" onClick={() => onSectionChange?.("campaign-management")}>
-                  <Target className="h-4 w-4 mr-2" />
-                  View All Campaigns
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        )
+      
 
       case "campaign-management":
         return (
           <div className="space-y-6">
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Campaign Management</CardTitle>
+                <CardTitle className="text-white">
+                  Campaign Management
+                </CardTitle>
                 <CardDescription className="text-slate-400">
                   Manage and monitor your marketing campaigns
                 </CardDescription>
@@ -483,12 +480,15 @@ export default function Marketing({
               <CardContent>
                 <div className="space-y-4">
                   {filteredCampaigns.map((campaign) => (
-                    <div key={campaign.id} className="p-4 border border-slate-700 rounded-lg bg-slate-900/50">
+                    <div
+                      key={campaign.id}
+                      className="p-4 border border-slate-700 rounded-lg bg-slate-900/50"
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium text-white">{campaign.name}</h3>
-                        <Badge
-                          className={getStatusColor(campaign.status)}
-                        >
+                        <h3 className="font-medium text-white">
+                          {campaign.name}
+                        </h3>
+                        <Badge className={getStatusColor(campaign.status)}>
                           {campaign.status}
                         </Badge>
                       </div>
@@ -502,7 +502,7 @@ export default function Marketing({
                       </div>
                       <div className="flex items-center justify-between text-sm text-slate-400 mt-2">
                         <span>Audience: {campaign.targetAudience}</span>
-                        <span>Channels: {campaign.channels.join(', ')}</span>
+                        <span>Channels: {campaign.channels.join(", ")}</span>
                       </div>
                     </div>
                   ))}
@@ -515,15 +515,19 @@ export default function Marketing({
               </CardContent>
             </Card>
           </div>
-        )
+        );
 
       case "content-creation":
         return (
           <div className="space-y-6">
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">AI Content Generator</CardTitle>
-                <CardDescription className="text-slate-400">Generate content ideas and copy</CardDescription>
+                <CardTitle className="text-white">
+                  AI Content Generator
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Generate content ideas and copy
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Input
@@ -539,7 +543,8 @@ export default function Marketing({
                 >
                   {isGeneratingTopics ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />{" "}
+                      Generating...
                     </>
                   ) : (
                     <>
@@ -553,18 +558,29 @@ export default function Marketing({
 
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Generated Content Ideas</CardTitle>
-                <CardDescription className="text-slate-400">Review and approve AI-suggested content topics</CardDescription>
+                <CardTitle className="text-white">
+                  Generated Content Ideas
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Review and approve AI-suggested content topics
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {generatedContentIdeas.length > 0 ? (
                     generatedContentIdeas.map((idea) => (
-                      <Card key={idea.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                      <Card
+                        key={idea.id}
+                        className="p-4 bg-slate-900/50 rounded-lg border border-slate-700"
+                      >
                         <CardContent className="p-0">
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium text-white">{idea.title}</h4>
-                            <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
+                            <h4 className="font-medium text-white">
+                              {idea.title}
+                            </h4>
+                            <Badge className={getStatusColor(idea.status)}>
+                              {idea.status}
+                            </Badge>
                           </div>
                           <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
                             <span>Type: {idea.type}</span>
@@ -583,7 +599,9 @@ export default function Marketing({
                               variant="outline"
                               size="sm"
                               className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600"
-                              onClick={() => handleDeleteIdea(idea.id, "generated")}
+                              onClick={() =>
+                                handleDeleteIdea(idea.id, "generated")
+                              }
                             >
                               <XCircle className="h-4 w-4 mr-2" /> Delete
                             </Button>
@@ -592,7 +610,9 @@ export default function Marketing({
                       </Card>
                     ))
                   ) : (
-                    <p className="text-slate-400">No new content ideas. Generate some above!</p>
+                    <p className="text-slate-400">
+                      No new content ideas. Generate some above!
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -600,18 +620,29 @@ export default function Marketing({
 
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Approved Content Ideas</CardTitle>
-                <CardDescription className="text-slate-400">Ideas ready for development</CardDescription>
+                <CardTitle className="text-white">
+                  Approved Content Ideas
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Ideas ready for development
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {approvedContentIdeas.length > 0 ? (
                     approvedContentIdeas.map((idea) => (
-                      <Card key={idea.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                      <Card
+                        key={idea.id}
+                        className="p-4 bg-slate-900/50 rounded-lg border border-slate-700"
+                      >
                         <CardContent className="p-0">
                           <div className="flex items-start justify-between mb-2">
-                            <h4 className="font-medium text-white">{idea.title}</h4>
-                            <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
+                            <h4 className="font-medium text-white">
+                              {idea.title}
+                            </h4>
+                            <Badge className={getStatusColor(idea.status)}>
+                              {idea.status}
+                            </Badge>
                           </div>
                           <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
                             <span>Type: {idea.type}</span>
@@ -621,7 +652,9 @@ export default function Marketing({
                             variant="outline"
                             size="sm"
                             className="w-full bg-red-600 hover:bg-red-700 text-white border-red-600"
-                            onClick={() => handleDeleteIdea(idea.id, "approved")}
+                            onClick={() =>
+                              handleDeleteIdea(idea.id, "approved")
+                            }
                           >
                             <XCircle className="h-4 w-4 mr-2" /> Delete
                           </Button>
@@ -629,28 +662,34 @@ export default function Marketing({
                       </Card>
                     ))
                   ) : (
-                    <p className="text-slate-400">No approved content ideas yet.</p>
+                    <p className="text-slate-400">
+                      No approved content ideas yet.
+                    </p>
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
-        )
+        );
 
       case "campaign-configuration":
         return (
           <div className="space-y-6">
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Campaign Configuration</CardTitle>
-                <CardDescription className="text-slate-400">Configure AI module for marketing campaigns</CardDescription>
+                <CardTitle className="text-white">
+                  Campaign Configuration
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Configure AI module for marketing campaigns
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <AgentForm department={department} onClose={onBack} />
+                <AgentForm department={department} onClose={onBackAction} />
               </CardContent>
             </Card>
           </div>
-        )
+        );
 
       default:
         return (
@@ -660,23 +699,28 @@ export default function Marketing({
                 <BarChart3 className="h-5 w-5 text-blue-400" />
                 <span>Marketing Hub Section</span>
               </CardTitle>
-              <CardDescription className="text-slate-400">This section is under development</CardDescription>
+              <CardDescription className="text-slate-400">
+                This section is under development
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-16">
                 <div className="p-4 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
                   <BarChart3 className="h-10 w-10 text-blue-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Coming Soon</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Coming Soon
+                </h3>
                 <p className="text-slate-400 max-w-md mx-auto">
-                  This section is under development. Stay tuned for exciting new features!
+                  This section is under development. Stay tuned for exciting new
+                  features!
                 </p>
               </div>
             </CardContent>
           </Card>
-        )
+        );
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -690,8 +734,12 @@ export default function Marketing({
                   <BarChart3 className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-white">Marketing Hub</h1>
-                  <p className="text-sm text-slate-400">AI-Powered Campaign Management & Content Creation</p>
+                  <h1 className="text-xl font-semibold text-white">
+                    Marketing Hub
+                  </h1>
+                  <p className="text-sm text-slate-400">
+                    AI-Powered Campaign Management & Content Creation
+                  </p>
                 </div>
               </div>
             </div>
@@ -700,7 +748,7 @@ export default function Marketing({
                 variant="outline"
                 size="sm"
                 className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700"
-                onClick={onBack}
+                onClick={onBackAction}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
               </Button>
@@ -709,7 +757,8 @@ export default function Marketing({
                 AI Enabled
               </Badge>
               <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-medium">
-                {campaigns.filter(c => c.status === 'active').length} Active Campaigns
+                {campaigns.filter((c) => c.status === "active").length} Active
+                Campaigns
               </Badge>
               <Button
                 variant="outline"
@@ -727,7 +776,9 @@ export default function Marketing({
         {/* Main Content Area */}
         <div className="flex-1 flex">
           {/* Content Area */}
-          <div className="flex-1 p-8 overflow-y-auto">{renderMainContent()}</div>
+          <div className="flex-1 p-8 overflow-y-auto">
+            {renderMainContent()}
+          </div>
 
           {/* AI Assistant Panel */}
           <div className="w-96 bg-slate-900/95 backdrop-blur-md border-l border-slate-700/50 shadow-lg flex flex-col">
@@ -735,28 +786,47 @@ export default function Marketing({
             <div className="p-6 border-b border-slate-700/50">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="client-select-ai" className="text-sm font-medium text-slate-300 mb-2 block">
+                  <Label
+                    htmlFor="client-select-ai"
+                    className="text-sm font-medium text-slate-300 mb-2 block"
+                  >
                     Select Client
                   </Label>
-                  <Select value={selectedClient || ""} onValueChange={setSelectedClient}>
-                    <SelectTrigger id="client-select-ai" className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400">
+                  <Select
+                    value={selectedClientId || ""}
+                    onValueChange={setSelectedClientId}
+                  >
+                    <SelectTrigger
+                      id="client-select-ai"
+                      className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400"
+                    >
                       <SelectValue placeholder="Choose a client" />
                     </SelectTrigger>
                     <SelectContent className="border-slate-600 bg-slate-800">
                       {clients.length === 0 ? (
-                        <SelectItem value="no-clients" disabled>No clients available</SelectItem>
+                        <SelectItem value="no-clients" disabled>
+                          No clients available
+                        </SelectItem>
                       ) : (
                         clients.map((client) => (
-                          <SelectItem key={client.id} value={client.name} className="py-3 text-white">
+                          <SelectItem
+                            key={client.id}
+                            value={client.id}
+                            className="py-3 text-white"
+                          >
                             <div className="flex items-center space-x-3 w-full">
                               <Avatar className="h-8 w-8">
-                                <AvatarImage src={client.avatar || "/placeholder.svg"} />
+                                <AvatarImage
+                                  src={client.avatar || "/placeholder.svg"}
+                                />
                                 <AvatarFallback className="bg-blue-600 text-white text-xs font-medium">
                                   {client.name.slice(0, 2)}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex-1">
-                                <div className="font-medium text-white">{client.name}</div>
+                                <div className="font-medium text-white">
+                                  {client.name}
+                                </div>
                                 <div className="text-xs text-slate-400 flex items-center space-x-2">
                                   <span>{client.industry}</span>
                                   <span>•</span>
@@ -766,34 +836,12 @@ export default function Marketing({
                                   </span>
                                 </div>
                               </div>
-                              <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                              <Badge
+                                variant="outline"
+                                className="text-xs border-slate-600 text-slate-300"
+                              >
                                 {client.tier}
                               </Badge>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="niche-select-ai" className="text-sm font-medium text-slate-300 mb-2 block">
-                    Select Niche
-                  </Label>
-                  <Select value={selectedNiche || ""} onValueChange={setSelectedNiche}>
-                    <SelectTrigger id="niche-select-ai" className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400">
-                      <SelectValue placeholder="Select a niche" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-600 bg-slate-800">
-                      {niches.length === 0 ? (
-                        <SelectItem value="no-niches" disabled>No niches available</SelectItem>
-                      ) : (
-                        niches.map((niche) => (
-                          <SelectItem key={niche.value} value={niche.value} className="py-2 text-white">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-lg">{niche.icon}</span>
-                              <span className="font-medium">{niche.label}</span>
                             </div>
                           </SelectItem>
                         ))
@@ -810,8 +858,12 @@ export default function Marketing({
                   <Bot className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">AI Marketing Strategist</h3>
-                  <p className="text-sm text-slate-400">Your intelligent marketing assistant</p>
+                  <h3 className="text-lg font-semibold text-white">
+                    AI Marketing Strategist
+                  </h3>
+                  <p className="text-sm text-slate-400">
+                    Your intelligent marketing assistant
+                  </p>
                 </div>
               </div>
             </div>
@@ -820,7 +872,10 @@ export default function Marketing({
             <div className="p-6 border-b border-slate-700/50">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="context-data" className="text-sm font-medium text-slate-300 mb-2 block">
+                  <Label
+                    htmlFor="context-data"
+                    className="text-sm font-medium text-slate-300 mb-2 block"
+                  >
                     Marketing Brief
                   </Label>
                   <Textarea
@@ -833,7 +888,9 @@ export default function Marketing({
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-slate-300 mb-2 block">Attach Files</Label>
+                  <Label className="text-sm font-medium text-slate-300 mb-2 block">
+                    Attach Files
+                  </Label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { type: "document", label: "Doc", icon: FileText },
@@ -848,7 +905,9 @@ export default function Marketing({
                         className="flex flex-col items-center p-3 h-auto border-slate-600 hover:border-blue-400 hover:bg-blue-500/20 bg-transparent text-slate-300"
                       >
                         <item.icon className="h-4 w-4 mb-1 text-slate-400" />
-                        <span className="text-xs font-medium">{item.label}</span>
+                        <span className="text-xs font-medium">
+                          {item.label}
+                        </span>
                       </Button>
                     ))}
                   </div>
@@ -863,12 +922,18 @@ export default function Marketing({
                       >
                         <div className="flex items-center space-x-2">
                           <Paperclip className="h-3 w-3 text-slate-500" />
-                          <span className="text-xs text-slate-300 font-medium">{file}</span>
+                          <span className="text-xs text-slate-300 font-medium">
+                            {file}
+                          </span>
                         </div>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setAttachedFiles((prev) => prev.filter((_, i) => i !== index))}
+                          onClick={() =>
+                            setAttachedFiles((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            )
+                          }
                           className="h-5 w-5 p-0 text-slate-400 hover:text-red-400"
                         >
                           <XCircle className="h-3 w-3" />
@@ -884,9 +949,18 @@ export default function Marketing({
             <ScrollArea className="flex-1 p-6">
               <div className="space-y-4">
                 {chatMessages.map((message) => (
-                  <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.type === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
                     <div
-                      className={`flex items-start space-x-3 max-w-[85%] ${message.type === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
+                      className={`flex items-start space-x-3 max-w-[85%] ${
+                        message.type === "user"
+                          ? "flex-row-reverse space-x-reverse"
+                          : ""
+                      }`}
                     >
                       <Avatar className="h-7 w-7 flex-shrink-0">
                         {message.type === "user" ? (
@@ -906,14 +980,18 @@ export default function Marketing({
                             : "bg-slate-800/50 text-slate-300 border border-slate-700"
                         }`}
                       >
-                        <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        <p className="leading-relaxed whitespace-pre-wrap">
+                          {message.content}
+                        </p>
                         {message.attachments && (
                           <div className="mt-2 space-y-1">
                             {message.attachments.map((file, index) => (
                               <div
                                 key={index}
                                 className={`text-xs flex items-center space-x-1 ${
-                                  message.type === "user" ? "text-blue-200" : "text-slate-500"
+                                  message.type === "user"
+                                    ? "text-blue-200"
+                                    : "text-slate-500"
                                 }`}
                               >
                                 <Paperclip className="h-3 w-3" />
@@ -922,7 +1000,13 @@ export default function Marketing({
                             ))}
                           </div>
                         )}
-                        <p className={`text-xs mt-2 ${message.type === "user" ? "text-blue-200" : "text-slate-500"}`}>
+                        <p
+                          className={`text-xs mt-2 ${
+                            message.type === "user"
+                              ? "text-blue-200"
+                              : "text-slate-500"
+                          }`}
+                        >
                           {message.timestamp.toLocaleTimeString()}
                         </p>
                       </div>
@@ -965,12 +1049,17 @@ export default function Marketing({
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     placeholder="Describe your marketing requirements..."
-                    onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && !e.shiftKey && handleSendMessage()
+                    }
                     className="flex-1 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400 text-sm"
                   />
                   <Button
                     onClick={handleSendMessage}
-                    disabled={!inputMessage.trim() && attachedFiles.length === 0 || isTyping}
+                    disabled={
+                      (!inputMessage.trim() && attachedFiles.length === 0) ||
+                      isTyping
+                    }
                     className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 px-4"
                   >
                     <Send className="h-4 w-4" />
@@ -982,5 +1071,5 @@ export default function Marketing({
         </div>
       </div>
     </div>
-  )
+  );
 }

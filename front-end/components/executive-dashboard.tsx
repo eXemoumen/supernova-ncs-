@@ -1,10 +1,16 @@
-"use client"
+"use client";
 
-import { useState,useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   BarChart3,
   Users,
@@ -24,7 +30,7 @@ import {
   PieChart,
   LineChart,
   PlusCircle,
-} from "lucide-react"
+} from "lucide-react";
 
 const iconMap: { [key: string]: any } = {
   BarChart3: BarChart3,
@@ -46,7 +52,7 @@ const iconMap: { [key: string]: any } = {
   LineChart: LineChart,
   PlusCircle: PlusCircle,
 };
-import Link from "next/link"
+import Link from "next/link";
 import {
   LineChart as RechartsLineChart,
   Line,
@@ -55,11 +61,11 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts"
-import AddClientForm from "./add-client-form"
+} from "recharts";
+import AddClientForm from "./add-client-form";
 
 interface ExecutiveDashboardProps {
-  onDepartmentChange: (department: string) => void
+  onDepartmentChangeAction: (department: string) => void;
 }
 
 // Add types for state variables
@@ -94,8 +100,10 @@ interface KpiMetric {
   description: string;
 }
 
-export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardProps) {
-  const [selectedTimeframe, setSelectedTimeframe] = useState("30d")
+export function ExecutiveDashboard({
+  onDepartmentChangeAction,
+}: ExecutiveDashboardProps) {
+  const [selectedTimeframe, setSelectedTimeframe] = useState("30d");
 
   const [revenueData, setRevenueData] = useState<RevenueDatum[]>([]);
   const [loadingRevenue, setLoadingRevenue] = useState(true);
@@ -105,13 +113,14 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
       setLoadingRevenue(true);
       try {
         // Replace with your actual backend API endpoint
-        const response = await fetch(`/api/dashboard/revenue?timeframe=${selectedTimeframe}`);
+        const response = await fetch(
+          `/api/dashboard/revenue?timeframe=${selectedTimeframe}`
+        );
         const data = await response.json();
         setRevenueData(data);
       } catch (error) {
         console.error("Error fetching revenue data:", error);
         // Fallback to sample data or show an error message
-        
       } finally {
         setLoadingRevenue(false);
       }
@@ -120,21 +129,25 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
     fetchRevenueData();
   }, [selectedTimeframe]);
 
-  const [departmentPerformance, setDepartmentPerformance] = useState<DepartmentPerformanceDatum[]>([]);
-  const [loadingDepartmentPerformance, setLoadingDepartmentPerformance] = useState(true);
+  const [departmentPerformance, setDepartmentPerformance] = useState<
+    DepartmentPerformanceDatum[]
+  >([]);
+  const [loadingDepartmentPerformance, setLoadingDepartmentPerformance] =
+    useState(true);
 
   useEffect(() => {
     const fetchDepartmentPerformance = async () => {
       setLoadingDepartmentPerformance(true);
       try {
         // Replace with your actual backend API endpoint
-        const response = await fetch(`/api/dashboard/department-performance?timeframe=${selectedTimeframe}`);
+        const response = await fetch(
+          `/api/dashboard/department-performance?timeframe=${selectedTimeframe}`
+        );
         const data = await response.json();
         setDepartmentPerformance(data);
       } catch (error) {
         console.error("Error fetching department performance data:", error);
         // Fallback to sample data or show an error message
-        
       } finally {
         setLoadingDepartmentPerformance(false);
       }
@@ -151,13 +164,14 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
       setLoadingAiInsights(true);
       try {
         // Replace with your actual backend API endpoint
-        const response = await fetch(`/api/dashboard/ai-insights?timeframe=${selectedTimeframe}`);
+        const response = await fetch(
+          `/api/dashboard/ai-insights?timeframe=${selectedTimeframe}`
+        );
         const data = await response.json();
         setAiInsights(data);
       } catch (error) {
         console.error("Error fetching AI insights:", error);
         // Fallback to sample data or show an error message
-        
       } finally {
         setLoadingAiInsights(false);
       }
@@ -174,13 +188,14 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
       setLoadingKpiMetrics(true);
       try {
         // Replace with your actual backend API endpoint
-        const response = await fetch(`/api/dashboard/kpi-metrics?timeframe=${selectedTimeframe}`);
+        const response = await fetch(
+          `/api/dashboard/kpi-metrics?timeframe=${selectedTimeframe}`
+        );
         const data = await response.json();
         setKpiMetrics(data);
       } catch (error) {
         console.error("Error fetching KPI metrics:", error);
         // Fallback to sample data or show an error message
-        
       } finally {
         setLoadingKpiMetrics(false);
       }
@@ -192,41 +207,44 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "urgent":
-        return "bg-red-500/20 text-red-300 border-red-500/30"
+        return "bg-red-500/20 text-red-300 border-red-500/30";
       case "high":
-        return "bg-amber-500/20 text-amber-300 border-amber-500/30"
+        return "bg-amber-500/20 text-amber-300 border-amber-500/30";
       case "medium":
-        return "bg-blue-500/20 text-blue-300 border-blue-500/30"
+        return "bg-blue-500/20 text-blue-300 border-blue-500/30";
       case "low":
-        return "bg-slate-500/20 text-slate-300 border-slate-500/30"
+        return "bg-slate-500/20 text-slate-300 border-slate-500/30";
       default:
-        return "bg-slate-500/20 text-slate-300 border-slate-500/30"
+        return "bg-slate-500/20 text-slate-300 border-slate-500/30";
     }
-  }
+  };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
       case "up":
-        return <ArrowUpRight className="h-4 w-4 text-emerald-400" />
+        return <ArrowUpRight className="h-4 w-4 text-emerald-400" />;
       case "down":
-        return <ArrowDownRight className="h-4 w-4 text-red-400" />
+        return <ArrowDownRight className="h-4 w-4 text-red-400" />;
       default:
-        return <Activity className="h-4 w-4 text-slate-400" />
+        return <Activity className="h-4 w-4 text-slate-400" />;
     }
-  }
+  };
 
   return (
     <div className="space-y-8">
       {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Executive Dashboard</h1>
-          <p className="text-slate-400 text-lg">Real-time insights and AI-powered recommendations</p>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Executive Dashboard
+          </h1>
+          <p className="text-slate-400 text-lg">
+            Real-time insights and AI-powered recommendations
+          </p>
         </div>
         <div className="flex items-center space-x-4">
-          
-            <AddClientForm/>
-          
+          <AddClientForm />
+
           <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-2">
             {["7d", "30d", "90d", "1y"].map((period) => (
               <Button
@@ -254,12 +272,17 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
       {/* KPI Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiMetrics.map((metric, index) => {
-          const Icon = iconMap[metric.icon]
+          const Icon = iconMap[metric.icon];
           return (
-            <Card key={index} className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+            <Card
+              key={index}
+              className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm"
+            >
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${metric.color} shadow-lg`}>
+                  <div
+                    className={`p-3 rounded-xl bg-gradient-to-r ${metric.color} shadow-lg`}
+                  >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex items-center space-x-1">
@@ -269,8 +292,8 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
                         metric.trend === "up"
                           ? "text-emerald-400"
                           : metric.trend === "down"
-                            ? "text-red-400"
-                            : "text-slate-400"
+                          ? "text-red-400"
+                          : "text-slate-400"
                       }`}
                     >
                       {metric.change}
@@ -278,13 +301,17 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
                   </div>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-white mb-1">{metric.value}</p>
+                  <p className="text-2xl font-bold text-white mb-1">
+                    {metric.value}
+                  </p>
                   <p className="text-sm text-slate-400">{metric.title}</p>
-                  <p className="text-xs text-slate-500 mt-1">{metric.description}</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {metric.description}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
@@ -297,7 +324,9 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
               <LineChart className="h-5 w-5 text-blue-400" />
               <span>Revenue & Profit Trends</span>
             </CardTitle>
-            <CardDescription className="text-slate-400">Monthly financial performance overview</CardDescription>
+            <CardDescription className="text-slate-400">
+              Monthly financial performance overview
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-80">
@@ -314,8 +343,20 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
                       color: "#F9FAFB",
                     }}
                   />
-                  <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={3} dot={{ fill: "#3B82F6" }} />
-                  <Line type="monotone" dataKey="profit" stroke="#10B981" strokeWidth={3} dot={{ fill: "#10B981" }} />
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#3B82F6"
+                    strokeWidth={3}
+                    dot={{ fill: "#3B82F6" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="profit"
+                    stroke="#10B981"
+                    strokeWidth={3}
+                    dot={{ fill: "#10B981" }}
+                  />
                 </RechartsLineChart>
               </ResponsiveContainer>
             </div>
@@ -329,7 +370,9 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
               <PieChart className="h-5 w-5 text-purple-400" />
               <span>Department Performance</span>
             </CardTitle>
-            <CardDescription className="text-slate-400">Current efficiency scores by department</CardDescription>
+            <CardDescription className="text-slate-400">
+              Current efficiency scores by department
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -339,7 +382,11 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
                     <span className="text-white font-medium">{dept.name}</span>
                     <span className="text-slate-400">{dept.value}%</span>
                   </div>
-                  <Progress value={dept.value} className="h-2" style={{ backgroundColor: dept.color + "20" }} />
+                  <Progress
+                    value={dept.value}
+                    className="h-2"
+                    style={{ backgroundColor: dept.color + "20" }}
+                  />
                 </div>
               ))}
             </div>
@@ -361,7 +408,8 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
                 </Badge>
               </CardTitle>
               <CardDescription className="text-slate-400">
-                Real-time recommendations based on data analysis and predictive modeling
+                Real-time recommendations based on data analysis and predictive
+                modeling
               </CardDescription>
             </div>
             <Button
@@ -377,7 +425,7 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
         <CardContent>
           <div className="space-y-6">
             {aiInsights.map((insight, index) => {
-              const Icon = iconMap[insight.icon]
+              const Icon = iconMap[insight.icon];
               return (
                 <div
                   key={index}
@@ -390,30 +438,48 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center space-x-3">
-                          <h3 className="font-semibold text-white">{insight.department} Department</h3>
-                          <Badge className={getPriorityColor(insight.priority)}>{insight.priority.toUpperCase()}</Badge>
+                          <h3 className="font-semibold text-white">
+                            {insight.department} Department
+                          </h3>
+                          <Badge className={getPriorityColor(insight.priority)}>
+                            {insight.priority.toUpperCase()}
+                          </Badge>
                           <div className="flex items-center space-x-1">
                             {getTrendIcon(insight.trend)}
-                            <span className="text-xs text-slate-400">Trending</span>
+                            <span className="text-xs text-slate-400">
+                              Trending
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center space-x-4">
                           <div className="text-right">
-                            <p className="text-sm font-medium text-emerald-400">{insight.impact}</p>
-                            <p className="text-xs text-slate-500">Potential Impact</p>
+                            <p className="text-sm font-medium text-emerald-400">
+                              {insight.impact}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Potential Impact
+                            </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium text-blue-400">{insight.confidence}%</p>
+                            <p className="text-sm font-medium text-blue-400">
+                              {insight.confidence}%
+                            </p>
                             <p className="text-xs text-slate-500">Confidence</p>
                           </div>
                         </div>
                       </div>
-                      <p className="text-slate-300 leading-relaxed mb-4">{insight.insight}</p>
+                      <p className="text-slate-300 leading-relaxed mb-4">
+                        {insight.insight}
+                      </p>
                       <div className="flex items-center justify-between">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => onDepartmentChange(insight.department.toLowerCase().replace(" ", "-"))}
+                          onClick={() =>
+                            onDepartmentChangeAction(
+                              insight.department.toLowerCase().replace(" ", "-")
+                            )
+                          }
                           className="border-slate-600 text-slate-300 hover:bg-slate-700"
                         >
                           <Zap className="h-4 w-4 mr-2" />
@@ -427,7 +493,7 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </CardContent>
@@ -443,8 +509,12 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
               </div>
               <h3 className="font-semibold text-white">Analytics Deep Dive</h3>
             </div>
-            <p className="text-slate-400 text-sm mb-4">Explore detailed performance metrics and trends</p>
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">View Analytics</Button>
+            <p className="text-slate-400 text-sm mb-4">
+              Explore detailed performance metrics and trends
+            </p>
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+              View Analytics
+            </Button>
           </CardContent>
         </Card>
 
@@ -456,8 +526,12 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
               </div>
               <h3 className="font-semibold text-white">AI Strategy Session</h3>
             </div>
-            <p className="text-slate-400 text-sm mb-4">Get personalized business recommendations</p>
-            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">Start Session</Button>
+            <p className="text-slate-400 text-sm mb-4">
+              Get personalized business recommendations
+            </p>
+            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+              Start Session
+            </Button>
           </CardContent>
         </Card>
 
@@ -469,11 +543,15 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
               </div>
               <h3 className="font-semibold text-white">Goal Tracking</h3>
             </div>
-            <p className="text-slate-400 text-sm mb-4">Monitor progress towards quarterly objectives</p>
-            <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">View Goals</Button>
+            <p className="text-slate-400 text-sm mb-4">
+              Monitor progress towards quarterly objectives
+            </p>
+            <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white">
+              View Goals
+            </Button>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

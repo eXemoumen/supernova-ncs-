@@ -1,9 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(req: Request) {
   try {
-    const { prompt, client, niche, brief } = await req.json();
+    const { prompt, brief, clientId } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
@@ -17,10 +18,34 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
+    let clientName = "Not specified";
+    let clientNiche = "Not specified";
+    let clientIndustry = "Not specified";
+    let clientNotes = "No specific notes provided.";
+
+    if (clientId) {
+      const { data: clientData, error: clientError } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+
+      if (clientError) {
+        console.error("Error fetching client data:", clientError);
+      } else if (clientData) {
+        clientName = clientData.name || clientName;
+        clientNiche = clientData.niche || clientNiche;
+        clientIndustry = clientData.industry || clientIndustry;
+        clientNotes = clientData.notes || clientNotes;
+      }
+    }
+
     const systemPrompt = `You are an AI Marketing Strategist for OmniDesk. Your task is to generate creative and relevant content topics based on the user's prompt and provided context.
     Consider the following:
-    - Client: ${client || "Not specified"}
-    - Niche: ${niche || "Not specified"}
+    - Client Name: ${clientName}
+    - Client Niche: ${clientNiche}
+    - Client Industry: ${clientIndustry}
+    - Client Notes: ${clientNotes}
     - Marketing Brief: ${brief || "No specific brief provided."}
 
     Generate a list of 5-10 distinct content topics. Present them as a numbered list, like this:

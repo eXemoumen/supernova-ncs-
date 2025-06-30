@@ -1,37 +1,46 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import type { LucideIcon } from "lucide-react"
-import { Users, CheckCircle, TrendingUp } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import type { LucideIcon } from "lucide-react";
+import { Users, CheckCircle, TrendingUp } from "lucide-react";
 
 interface Department {
-  id: string
-  name: string
-  icon: LucideIcon
-  color: string
-  description: string
-  features: string[]
-  status: "active" | "pending" | "inactive"
-  activeUsers: number
-  completedTasks: number
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  color: string;
+  description: string;
+  features: string[];
+  status: "active" | "pending" | "inactive";
+  activeUsers: number;
+  completedTasks: number;
 }
 
 interface DepartmentCardProps {
-  department: Department
-  onClick: () => void
+  department: Department;
+  onClickAction: () => void;
 }
 
-export function DepartmentCard({ department, onClick }: DepartmentCardProps) {
-  const Icon = department.icon
-  const progress = Math.min((department.completedTasks / 100) * 100, 100)
+export function DepartmentCard({
+  department,
+  onClickAction,
+}: DepartmentCardProps) {
+  const Icon = department.icon;
+  const progress = Math.min((department.completedTasks / 100) * 100, 100);
 
   return (
     <Card
       className="hover:shadow-xl transition-all duration-300 cursor-pointer group border-0 shadow-lg bg-white/80 backdrop-blur-sm"
-      onClick={onClick}
+      onClick={onClickAction}
     >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between mb-3">
@@ -40,12 +49,19 @@ export function DepartmentCard({ department, onClick }: DepartmentCardProps) {
           >
             <Icon className="h-6 w-6 text-white" />
           </div>
-          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+          <Badge
+            variant="outline"
+            className="bg-emerald-50 text-emerald-700 border-emerald-200"
+          >
             {department.status}
           </Badge>
         </div>
-        <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">{department.name}</CardTitle>
-        <CardDescription className="text-sm">{department.description}</CardDescription>
+        <CardTitle className="text-lg group-hover:text-blue-600 transition-colors">
+          {department.name}
+        </CardTitle>
+        <CardDescription className="text-sm">
+          {department.description}
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -53,11 +69,15 @@ export function DepartmentCard({ department, onClick }: DepartmentCardProps) {
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-slate-500" />
-            <span className="text-sm font-medium">{department.activeUsers} users</span>
+            <span className="text-sm font-medium">
+              {department.activeUsers} users
+            </span>
           </div>
           <div className="flex items-center space-x-2">
             <CheckCircle className="h-4 w-4 text-emerald-500" />
-            <span className="text-sm font-medium">{department.completedTasks} tasks</span>
+            <span className="text-sm font-medium">
+              {department.completedTasks} tasks
+            </span>
           </div>
         </div>
 
@@ -93,5 +113,5 @@ export function DepartmentCard({ department, onClick }: DepartmentCardProps) {
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }

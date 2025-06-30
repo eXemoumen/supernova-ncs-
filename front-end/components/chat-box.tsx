@@ -1,26 +1,32 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { X, Send, Bot, User, ThumbsUp, ThumbsDown } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { X, Send, Bot, User, ThumbsUp, ThumbsDown } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatBoxProps {
-  department: string
-  onClose: () => void
+  department: string;
+  onCloseAction: () => void;
 }
 
 interface Message {
-  id: string
-  type: "user" | "ai"
-  content: string
-  timestamp: Date
+  id: string;
+  type: "user" | "ai";
+  content: string;
+  timestamp: Date;
 }
 
-export function ChatBox({ department, onClose }: ChatBoxProps) {
+export function ChatBox({ department, onCloseAction }: ChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -28,29 +34,29 @@ export function ChatBox({ department, onClose }: ChatBoxProps) {
       content: `Hello! I'm your AI assistant for the ${department} department. How can I help you configure your AI modules today?`,
       timestamp: new Date(),
     },
-  ])
-  const [input, setInput] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const { toast } = useToast()
-  const [uniqueId, setUniqueId] = useState("")
+  ]);
+  const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const { toast } = useToast();
+  const [uniqueId, setUniqueId] = useState("");
 
   useEffect(() => {
-    setUniqueId(`user-${messages.length}-${Date.now()}`)
-  }, [messages.length])
+    setUniqueId(`user-${messages.length}-${Date.now()}`);
+  }, [messages.length]);
 
   const handleSend = async () => {
-    if (!input.trim()) return
+    if (!input.trim()) return;
 
     const userMessage: Message = {
       id: uniqueId,
       type: "user",
       content: input,
       timestamp: new Date(),
-    }
+    };
 
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsTyping(true)
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
 
     // Simulate AI response
     setTimeout(() => {
@@ -59,18 +65,19 @@ export function ChatBox({ department, onClose }: ChatBoxProps) {
         type: "ai",
         content: `I understand you want to work on "${input}". Let me help you configure the best AI module for this task. Would you like me to suggest some parameters?`,
         timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, aiMessage])
-      setIsTyping(false)
-    }, 1500)
-  }
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+      setIsTyping(false);
+    }, 1500);
+  };
 
   const handleFeedback = (messageId: string, positive: boolean) => {
     toast({
       title: positive ? "Positive Feedback" : "Negative Feedback",
-      description: "Thank you for your feedback! This helps improve our AI responses.",
-    })
-  }
+      description:
+        "Thank you for your feedback! This helps improve our AI responses.",
+    });
+  };
 
   return (
     <Card className="w-full max-w-4xl mx-auto h-[600px] flex flex-col">
@@ -83,9 +90,11 @@ export function ChatBox({ department, onClose }: ChatBoxProps) {
               {department}
             </Badge>
           </CardTitle>
-          <CardDescription>Reflect-AI powered conversation for module optimization</CardDescription>
+          <CardDescription>
+            Reflect-AI powered conversation for module optimization
+          </CardDescription>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
+        <Button variant="ghost" size="sm" onClick={onCloseAction}>
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>
@@ -94,11 +103,24 @@ export function ChatBox({ department, onClose }: ChatBoxProps) {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((message) => (
-            <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
+            <div
+              key={message.id}
+              className={`flex ${
+                message.type === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
               <div
-                className={`flex items-start space-x-2 max-w-[80%] ${message.type === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
+                className={`flex items-start space-x-2 max-w-[80%] ${
+                  message.type === "user"
+                    ? "flex-row-reverse space-x-reverse"
+                    : ""
+                }`}
               >
-                <div className={`p-2 rounded-full ${message.type === "user" ? "bg-blue-600" : "bg-slate-200"}`}>
+                <div
+                  className={`p-2 rounded-full ${
+                    message.type === "user" ? "bg-blue-600" : "bg-slate-200"
+                  }`}
+                >
                   {message.type === "user" ? (
                     <User className="h-4 w-4 text-white" />
                   ) : (
@@ -106,10 +128,20 @@ export function ChatBox({ department, onClose }: ChatBoxProps) {
                   )}
                 </div>
                 <div
-                  className={`p-3 rounded-lg ${message.type === "user" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-900"}`}
+                  className={`p-3 rounded-lg ${
+                    message.type === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-100 text-slate-900"
+                  }`}
                 >
                   <p className="text-sm">{message.content}</p>
-                  <p className={`text-xs mt-1 ${message.type === "user" ? "text-blue-100" : "text-slate-500"}`}>
+                  <p
+                    className={`text-xs mt-1 ${
+                      message.type === "user"
+                        ? "text-blue-100"
+                        : "text-slate-500"
+                    }`}
+                  >
                     {message.timestamp.toLocaleTimeString()}
                   </p>
                   {message.type === "ai" && (
@@ -178,5 +210,5 @@ export function ChatBox({ department, onClose }: ChatBoxProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
