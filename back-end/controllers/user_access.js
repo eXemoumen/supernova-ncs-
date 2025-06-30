@@ -10,17 +10,19 @@ exports.createAccess = async (req, res) => {
     }
   
     try {
-      await db.execute(
-        `INSERT INTO user_access
-          (user_id, marketing, hr, finance, support, operations)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [user_id, marketing, hr, finance, support, operations]
-      );
+      const { data, error } = await db.from('user_access').insert([
+        { user_id, marketing, hr, finance, support, operations }
+      ]);
+
+      if (error) {
+        if (error.code === '23505') { // PostgreSQL unique violation error code
+          return res.status(409).json({ error: 'User already exists' });
+        }
+        throw error;
+      }
+
       res.status(201).json({ success: true, user_id });
     } catch (err) {
-      if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(409).json({ error: 'User already exists' });
-      }
       res.status(500).json({ error: 'Failed to create user access', detail: err.message });
     }
   };
@@ -29,12 +31,12 @@ exports.createAccess = async (req, res) => {
 exports.getAccess = async (req, res) => {
   const { user_id } = req.params;
   try {
-    const [rows] = await db.execute(
-      'SELECT * FROM user_access WHERE user_id = ?',
-      [user_id]
-    );
-    if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
-    res.json(rows[0]);
+    const { data, error } = await db.from('user_access').select('*').eq('user_id', user_id);
+
+    if (error) throw error;
+
+    if (data.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json(data[0]);
   } catch (err) {
     res.status(500).json({ error: 'Database error', detail: err.message });
   }
@@ -46,12 +48,12 @@ exports.updateAccess = async (req, res) => {
   const { marketing, hr, finance, support, operations } = req.body;
 
   try {
-    await db.execute(
-      `UPDATE user_access
-       SET marketing = ?, hr = ?, finance = ?, support = ?, operations = ?
-       WHERE user_id = ?`,
-      [marketing, hr, finance, support, operations, user_id]
-    );
+    const { data, error } = await db.from('user_access')
+      .update({ marketing, hr, finance, support, operations })
+      .eq('user_id', user_id);
+
+    if (error) throw error;
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Update failed', detail: err.message });
@@ -68,14 +70,13 @@ exports.checkDepartmentAccess = async (req, res) => {
   }
 
   try {
-    const [rows] = await db.execute(
-      `SELECT ?? FROM user_access WHERE user_id = ?`,
-      [department, user_id]
-    );
+    const { data, error } = await db.from('user_access').select(department).eq('user_id', user_id);
 
-    if (!rows.length) return res.status(404).json({ error: 'User not found' });
+    if (error) throw error;
 
-    res.json({ access: rows[0][department] === 1 });
+    if (!data.length) return res.status(404).json({ error: 'User not found' });
+
+    res.json({ access: data[0][department] === 1 });
   } catch (err) {
     res.status(500).json({ error: 'Check failed', detail: err.message });
   }
@@ -83,14 +84,13 @@ exports.checkDepartmentAccess = async (req, res) => {
 
 exports.getAll = async (req,res) =>{
     try {
-        const [rows] = await db.execute(
-          `SELECT * FROM user_access`,
-          [department, user_id]
-        );
+        const { data, error } = await db.from('user_access').select('*');
     
-        if (!rows.length) return res.status(404).json({ error: 'User not found' });
+        if (error) throw error;
+
+        if (!data.length) return res.status(404).json({ error: 'No users found' });
     
-        res.json({ access: rows[0][department] === 1 });
+        res.json({ access: data });
       } catch (err) {
         res.status(500).json({ error: 'Check failed', detail: err.message });
       }
