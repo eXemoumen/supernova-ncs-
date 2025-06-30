@@ -1,46 +1,63 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import {
+  BarChart3,
   MessageSquare,
-  Send,
+  TrendingUp,
+  PenTool,
+  Target,
+  Share2,
+  Zap,
+  Bell,
+  Activity,
+  PlusCircle,
   Bot,
-  User,
-  FileText,
-  ImageIcon,
-  Video,
-  CheckCircle,
-  XCircle,
+  Search,
+  Layout,
+  Briefcase,
+  BookOpen,
+  Shield,
+  Archive,
+  Users,
   Clock,
   Eye,
   Download,
-  Share2,
-  Sparkles,
-  Target,
   RotateCcw,
-  Building2,
-  Zap,
-  Star,
-  Calendar,
-  Search,
-  Paperclip,
+  CheckCircle,
+  XCircle,
   AlertCircle,
-  TrendingUp,
-  Bell,
-  Activity,
+  Calendar,
+  User,
+  Building2,
+  FileText,
+  ImageIcon,
+  Video,
+  Paperclip,
+  Send,
+  DollarSign,
+  LineChart,
+  Star,
+  Loader2,
+  ArrowLeft,
+  Sparkles, // Added for Content Studio icon
 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 
-interface ContentStudioProps {
+import { DepartmentChatbot } from "@/components/department-chatbot"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { useToast } from "@/hooks/use-toast"
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
+import { AgentForm } from "@/components/agent-form"
+
+interface ContentStudioProps { // Renamed from MarketingProps
   onBack: () => void
   department: any
   activeSection?: string
@@ -55,128 +72,100 @@ interface ChatMessage {
   attachments?: string[]
 }
 
-interface ContentResult {
-  id: string
-  type: "text" | "image" | "video" | "social" | "email" | "blog"
-  title: string
-  content: string
-  status: "pending" | "approved" | "rejected" | "revision" | "in-review"
-  createdAt: Date
+interface Campaign {
+  id: number
+  name: string
+  status: "active" | "draft" | "completed"
+  performance: number
+  budget: string
+  startDate: string
+  endDate: string
+  targetAudience: string
+  channels: string[]
+  roi: number
   client: string
   niche: string
-  assignee?: string
-  priority: "low" | "medium" | "high"
-  wordCount?: number
-  estimatedTime?: string
 }
 
-export default function ContentStudio({
+interface ContentPiece { // Renamed from ContentIdea
+  id: string;
+  title: string;
+  type: "blog" | "social" | "email" | "video" | "article" | "other"; // Added 'article' for flexibility
+  status: "new" | "approved" | "deleted";
+  priority: "low" | "medium" | "high";
+  client?: string; // Optional, as AI might not always provide
+  niche?: string; // Optional
+}
+
+interface MarketingDataPoint {
+  month: string;
+  revenue: number;
+  spend: number;
+  roi: number;
+  client: string;
+  niche: string;
+}
+
+export default function ContentStudio({ // Renamed from Marketing
   onBack,
   department,
-  activeSection = "workspace",
+  activeSection = "dashboard",
   onSectionChange,
-}: ContentStudioProps) {
-  const [selectedClient, setSelectedClient] = useState("")
-  const [selectedNiche, setSelectedNiche] = useState("")
+}: ContentStudioProps) { // Renamed from MarketingProps
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
       id: "1",
       type: "ai",
       content:
-        "Welcome to OmniDesk Content Studio! I'm your AI Content Strategist. To create exceptional content that resonates with your audience, please select your client and target niche. I'll then provide personalized recommendations and generate content that aligns with your brand guidelines and objectives.",
+        "Welcome to OmniDesk Content Studio! I'm your AI Content Assistant. I can help you with content generation, editing, and approval workflows. How can I assist you today?", // Updated initial message
       timestamp: new Date(),
     },
-  ])
-  const [inputMessage, setInputMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const [attachedFiles, setAttachedFiles] = useState<string[]>([])
-  const [contextData, setContextData] = useState("")
-  const [contentResults, setContentResults] = useState<ContentResult[]>([
-    {
-      id: "1",
-      type: "social",
-      title: "LinkedIn Thought Leadership Post",
-      content:
-        "🚀 The future of business lies in intelligent automation. At TechCorp, we're not just adapting to change—we're driving it. Our latest AI solutions have helped 500+ companies transform their operations, resulting in 40% efficiency gains and $2M+ in cost savings. Ready to lead the digital revolution? #Innovation #AI #BusinessTransformation",
-      status: "pending",
-      createdAt: new Date(),
-      client: "TechCorp Inc.",
-      niche: "Technology",
-      assignee: "Sarah Chen",
-      priority: "high",
-      wordCount: 67,
-      estimatedTime: "2 min read",
-    },
-    {
-      id: "2",
-      type: "blog",
-      title: "The Complete Guide to Digital Transformation",
-      content:
-        "In today's rapidly evolving business landscape, digital transformation isn't just an option—it's a necessity. Organizations that embrace digital innovation are 23% more profitable than their competitors. This comprehensive guide explores proven strategies, real-world case studies, and actionable insights to help your business thrive in the digital age...",
-      status: "approved",
-      createdAt: new Date(),
-      client: "StartupXYZ",
-      niche: "Business Consulting",
-      assignee: "Mike Johnson",
-      priority: "medium",
-      wordCount: 1250,
-      estimatedTime: "5 min read",
-    },
-    {
-      id: "3",
-      type: "email",
-      title: "Product Launch Announcement Email",
-      content:
-        "Subject: Introducing Revolutionary Healthcare Solutions 🏥\n\nDear [Name],\n\nWe're excited to announce the launch of our groundbreaking healthcare platform that's already transforming patient care across 200+ facilities. With 99.9% uptime and HIPAA compliance, we're setting new standards in healthcare technology...",
-      status: "in-review",
-      createdAt: new Date(),
-      client: "HealthPlus",
-      niche: "Healthcare",
-      assignee: "Lisa Wang",
-      priority: "high",
-      wordCount: 180,
-      estimatedTime: "1 min read",
-    },
-  ])
-  const [filterStatus, setFilterStatus] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const { toast } = useToast()
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
+  const [contextData, setContextData] = useState("");
+  const [topicPrompt, setTopicPrompt] = useState(""); // This will be for content piece generation now
+  const [generatedContentIdeas, setGeneratedContentIdeas] = useState<ContentPiece[]>([]); // Renamed from generatedTopics
+  const [approvedContentIdeas, setApprovedContentIdeas] = useState<ContentPiece[]>([]); // Renamed from approvedTopics
+  const [isGeneratingTopics, setIsGeneratingTopics] = useState(false); // Renamed from isGeneratingTopics
+  const [generatedCampaigns, setGeneratedCampaigns] = useState<Campaign[]>([]);
+  const [isGeneratingCampaigns, setIsGeneratingCampaigns] = useState(false);
+  const { toast } = useToast();
 
-  const [clients, setClients] = useState<any[]>([]);
-  const [niches, setNiches] = useState<any[]>([]);
-  const [loadingClients, setLoadingClients] = useState(true);
-  const [loadingNiches, setLoadingNiches] = useState(true);
+  const [selectedClient, setSelectedClient] = useState("")
+  const [selectedNiche, setSelectedNiche] = useState("")
+  const [clients, setClients] = useState<any[]>([
+    { id: "client-a", name: "Client A", avatar: "/placeholder-user.jpg", industry: "Tech", satisfaction: 4.5, tier: "Premium" },
+    { id: "client-b", name: "Client B", avatar: "/placeholder-user.jpg", industry: "Retail", satisfaction: 3.8, tier: "Standard" },
+    { id: "client-c", name: "Client C", avatar: "/placeholder-user.jpg", industry: "Healthcare", satisfaction: 4.9, tier: "Enterprise" },
+  ]);
+  const [niches, setNiches] = useState<any[]>([
+    { value: "Digital Marketing", label: "Digital Marketing", icon: "📊" },
+    { value: "Technology", label: "Technology", icon: "💻" },
+    { value: "Healthcare", label: "Healthcare", icon: "⚕️" },
+    { value: "Finance", label: "Finance", icon: "💰" },
+    { value: "Education", label: "Education", icon: "📚" },
+  ]);
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      setLoadingClients(true);
-      try {
-        const response = await fetch("/api/clients");
-        const data = await response.json();
-        setClients(data);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-      } finally {
-        setLoadingClients(false);
-      }
-    };
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [contentIdeas, setContentIdeas] = useState<ContentPiece[]>([]); // Changed type to ContentPiece
+  const [marketingData, setMarketingData] = useState<MarketingDataPoint[]>([]);
 
-    const fetchNiches = async () => {
-      setLoadingNiches(true);
-      try {
-        const response = await fetch("/api/niches");
-        const data = await response.json();
-        setNiches(data);
-      } catch (error) {
-        console.error("Error fetching niches:", error);
-      } finally {
-        setLoadingNiches(false);
-      }
-    };
+  const filteredCampaigns = campaigns.filter(campaign => {
+    return (!selectedClient || campaign.client === selectedClient) &&
+           (!selectedNiche || campaign.niche === selectedNiche);
+  });
 
-    fetchClients();
-    fetchNiches();
-  }, []);
+  const filteredContentIdeas = contentIdeas.filter(idea => {
+    return (!selectedClient || idea.client === selectedClient) &&
+           (!selectedNiche || idea.niche === selectedNiche);
+  });
+
+  const filteredMarketingData = marketingData.filter(dataPoint => {
+    return (!selectedClient || dataPoint.client === selectedClient) &&
+           (!selectedNiche || dataPoint.niche === selectedNiche);
+  });
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() && attachedFiles.length === 0) return
@@ -194,66 +183,137 @@ export default function ContentStudio({
     setAttachedFiles([])
     setIsTyping(true)
 
-    setTimeout(() => {
-      const selectedClientData = clients.find((c) => c.name === selectedClient)
-      const selectedNicheData = niches.find((n) => n.value === selectedNiche)
+    try {
+      const response = await fetch("/api/content-studio-chat", { // Updated API endpoint
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage.content,
+          context: contextData,
+          client: selectedClient,
+          niche: selectedNiche,
+        }),
+      });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
       const aiResponse: ChatMessage = {
         id: `ai-${chatMessages.length}-${Date.now()}`,
         type: "ai",
-        content: `Excellent! I'm analyzing your request for ${selectedClientData?.name || "your client"} in the ${selectedNicheData?.label || "selected niche"} sector. Based on their ${selectedClientData?.tier} tier status and ${selectedClientData?.satisfaction}/5 satisfaction rating, I'm crafting content that aligns with their brand voice and audience preferences.
-
-Key considerations for this content:
-• Target audience engagement patterns
-• Industry-specific terminology and trends  
-• Brand voice consistency
-• SEO optimization opportunities
-• Conversion-focused messaging
-
-Your content will be ready for review in the workspace. I've optimized it for maximum impact and engagement.`,
+        content: data.response,
         timestamp: new Date(),
-      }
-      setChatMessages((prev) => [...prev, aiResponse])
-      setIsTyping(false)
-
-      const contentTypeOptions = ["blog", "social", "email", "video"]
-      const randomType = contentTypeOptions[0]
-
-      const newResult: ContentResult = {
-        id: `content-${contentResults.length}-${Date.now()}`,
-        type: randomType as any,
-        title: `AI-Generated ${randomType.charAt(0).toUpperCase() + randomType.slice(1)} Content`,
-        content: generateSampleContent(randomType, selectedClient, selectedNiche, inputMessage),
-        status: "pending",
-        createdAt: new Date(),
-        client: selectedClient || "Selected Client",
-        niche: selectedNicheData?.label || "Selected Niche",
-        assignee: "AI Assistant",
-        priority: "medium",
-        wordCount: 300,
-        estimatedTime: `3 min read`,
-      }
-      setContentResults((prev) => [newResult, ...prev])
-
-      toast({
-        title: "Content Generated Successfully",
-        description: "Your AI-generated content is ready for review in the workspace.",
-      })
-    }, 2500)
-  }
-
-  const generateSampleContent = (type: string, client: string, niche: string, request: string) => {
-    const templates = {
-      blog: `# ${request}\n\nIn today's competitive ${niche} landscape, ${client} stands at the forefront of innovation. This comprehensive analysis explores key trends, strategic insights, and actionable recommendations that drive measurable results.\n\n## Key Insights\n- Industry-leading practices\n- Data-driven strategies\n- Future-focused solutions\n\n*This content has been optimized for SEO and engagement.*`,
-      social: `🚀 ${request}\n\n${client} is revolutionizing the ${niche} industry with cutting-edge solutions that deliver real results. Join thousands of satisfied customers who've already transformed their business.\n\n✨ Key benefits:\n• Increased efficiency\n• Cost optimization\n• Scalable growth\n\n#Innovation #${niche.replace(/\s+/g, "")} #BusinessGrowth`,
-      email: `Subject: ${request} - Exclusive Insights from ${client}\n\nDear [Name],\n\nWe're excited to share exclusive insights about ${request} that are transforming the ${niche} industry. Our latest research reveals breakthrough strategies that leading companies are using to stay ahead.\n\nBest regards,\nThe ${client} Team`,
-      video: `[SCENE 1: Opening Hook]\n"${request}" - This question is reshaping the ${niche} industry.\n\n[SCENE 2: Problem Statement]\nAt ${client}, we understand the challenges you face...\n\n[SCENE 3: Solution]\nOur innovative approach delivers...\n\n[SCENE 4: Call to Action]\nReady to transform your business? Contact us today.`,
+      };
+      setChatMessages((prev) => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("Error sending message to Gemini API:", error);
+      const errorMessage: ChatMessage = {
+        id: `ai-error-${Date.now()}`,
+        type: "ai",
+        content: "Sorry, I'm having trouble connecting to the AI. Please try again later.",
+        timestamp: new Date(),
+      };
+      setChatMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsTyping(false);
     }
-    return (
-      templates[type as keyof typeof templates] ||
-      `Generated content for ${request} targeting ${niche} audience for ${client}.`
-    )
   }
+
+  const handleGenerateContentPieces = async () => { // Renamed from handleGenerateTopics
+    if (!topicPrompt.trim()) return;
+
+    setIsGeneratingTopics(true); // Keep this state name for now, will refactor later
+    setGeneratedContentIdeas([]); // Clear previous content pieces
+
+    try {
+      const response = await fetch("/api/generate-content-pieces", { // Updated API endpoint
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: topicPrompt,
+          client: selectedClient,
+          niche: selectedNiche,
+          brief: contextData,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const parsedContentPieces = data.contentPieces.split('\n').map((line: string) => line.replace(/^\d+\.\s*/, '')).filter((line: string) => line.trim() !== '');
+      const newContentIdeas: ContentPiece[] = parsedContentPieces.map((piece: string) => ({
+        id: `piece-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: piece,
+        type: "other", // Default type, can be refined later
+        status: "new",
+        priority: "medium", // Default priority, can be refined later
+        client: selectedClient,
+        niche: selectedNiche,
+      }));
+      setGeneratedContentIdeas(prev => [...prev, ...newContentIdeas]);
+    } catch (error) {
+      console.error("Error generating content pieces:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate content pieces. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingTopics(false);
+    }
+  };
+
+  const handleApproveIdea = (id: string) => {
+    setGeneratedContentIdeas(prev => {
+      const ideaToApprove = prev.find(idea => idea.id === id);
+      if (ideaToApprove) {
+        const updatedIdea = { ...ideaToApprove, status: "approved" };
+        setApprovedContentIdeas(approvedPrev => [...approvedPrev, updatedIdea]);
+        toast({
+          title: "Content Piece Approved", // Updated toast message
+          description: `"${ideaToApprove.title}" has been approved.`, 
+        });
+        return prev.filter(idea => idea.id !== id);
+      }
+      return prev;
+    });
+  };
+
+  const handleDeleteIdea = (id: string, section: "generated" | "approved") => {
+    if (section === "generated") {
+      setGeneratedContentIdeas(prev => {
+        const ideaToDelete = prev.find(idea => idea.id === id);
+        if (ideaToDelete) {
+          toast({
+            title: "Content Piece Deleted", // Updated toast message
+            description: `"${ideaToDelete.title}" has been deleted.`, 
+          });
+          return prev.filter(idea => idea.id !== id);
+        }
+        return prev;
+      });
+    } else if (section === "approved") {
+      setApprovedContentIdeas(prev => {
+        const ideaToDelete = prev.find(idea => idea.id === id);
+        if (ideaToDelete) {
+          toast({
+            title: "Content Piece Deleted", // Updated toast message
+            description: `"${ideaToDelete.title}" has been deleted from approved content pieces.`, 
+          });
+          return prev.filter(idea => idea.id !== id);
+        }
+        return prev;
+      });
+    }
+  };
 
   const handleFileUpload = (type: string) => {
     const fileName = `${type}-${Date.now()}.${type === "image" ? "jpg" : type === "video" ? "mp4" : "pdf"}`
@@ -264,52 +324,16 @@ Your content will be ready for review in the workspace. I've optimized it for ma
     })
   }
 
-  const handleContentAction = (contentId: string, action: "approve" | "reject" | "revision" | "in-review") => {
-    setContentResults((prev) =>
-      prev.map((result) =>
-        result.id === contentId
-          ? {
-              ...result,
-              status: action as any,
-              assignee: action === "approve" ? "Approved" : action === "reject" ? "Rejected" : result.assignee,
-            }
-          : result,
-      ),
-    )
-
-    const actionMessages = {
-      approve: "Content approved and ready for publication",
-      reject: "Content rejected and moved to drafts",
-      revision: "Content sent back for revision",
-      "in-review": "Content moved to review queue",
-    }
-
-    toast({
-      title: `Content ${action.charAt(0).toUpperCase() + action.slice(1)}d`,
-      description: actionMessages[action],
-    })
-  }
-
   const getStatusColor = (status: string) => {
     const colors = {
-      approved: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-      rejected: "bg-red-500/20 text-red-300 border-red-500/30",
-      revision: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-      "in-review": "bg-blue-500/20 text-blue-300 border-blue-500/30",
-      pending: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+      active: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+      draft: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+      completed: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+      new: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+      "in-progress": "bg-orange-500/20 text-orange-300 border-orange-500/30",
+      approved: "bg-green-500/20 text-green-300 border-green-500/30",
     }
-    return colors[status as keyof typeof colors] || colors.pending
-  }
-
-  const getStatusIcon = (status: string) => {
-    const icons = {
-      approved: <CheckCircle className="h-4 w-4" />,
-      rejected: <XCircle className="h-4 w-4" />,
-      revision: <RotateCcw className="h-4 w-4" />,
-      "in-review": <Eye className="h-4 w-4" />,
-      pending: <Clock className="h-4 w-4" />,
-    }
-    return icons[status as keyof typeof icons] || icons.pending
+    return colors[status as keyof typeof colors] || colors.active
   }
 
   const getPriorityColor = (priority: string) => {
@@ -321,69 +345,19 @@ Your content will be ready for review in the workspace. I've optimized it for ma
     return colors[priority as keyof typeof colors] || colors.medium
   }
 
-  const getContentTypeIcon = (type: string) => {
-    const icons = {
-      blog: <FileText className="h-4 w-4" />,
-      social: <Share2 className="h-4 w-4" />,
-      email: <MessageSquare className="h-4 w-4" />,
-      video: <Video className="h-4 w-4" />,
-      image: <ImageIcon className="h-4 w-4" />,
-      text: <FileText className="h-4 w-4" />,
-    }
-    return icons[type as keyof typeof icons] || icons.text
-  }
-
-  const filteredResults = contentResults.filter((result) => {
-    const matchesStatus = filterStatus === "all" || result.status === filterStatus
-    const matchesSearch =
-      searchQuery === "" ||
-      result.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      result.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      result.content.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesStatus && matchesSearch
-  })
-
   const renderMainContent = () => {
     switch (activeSection) {
       case "dashboard":
         return (
           <div className="space-y-6">
-            {/* Dashboard Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Stats Cards - Adapted for Content Studio */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-400">Total Content</p>
-                      <p className="text-3xl font-bold text-white">{contentResults.length}</p>
-                    </div>
-                    <FileText className="h-8 w-8 text-indigo-400" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-slate-400">Pending Approval</p>
-                      <p className="text-3xl font-bold text-white">
-                        {contentResults.filter((r) => r.status === "pending").length}
-                      </p>
-                    </div>
-                    <Clock className="h-8 w-8 text-amber-400" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-slate-400">Approved Content</p>
-                      <p className="text-3xl font-bold text-white">
-                        {contentResults.filter((r) => r.status === "approved").length}
-                      </p>
+                      <p className="text-sm text-slate-400">Approved Pieces</p>
+                      <p className="text-2xl font-bold text-white">{approvedContentIdeas.length}</p>
                     </div>
                     <CheckCircle className="h-8 w-8 text-emerald-400" />
                   </div>
@@ -394,297 +368,209 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-slate-400">Active Clients</p>
-                      <p className="text-3xl font-bold text-white">{clients.length}</p>
+                      <p className="text-sm text-slate-400">Generated Pieces</p>
+                      <p className="text-2xl font-bold text-white">{generatedContentIdeas.length}</p>
                     </div>
-                    <Building2 className="h-8 w-8 text-purple-400" />
+                    <PenTool className="h-8 w-8 text-purple-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">Content Types</p>
+                      <p className="text-2xl font-bold text-white">5</p> {/* Placeholder */}
+                    </div>
+                    <Layout className="h-8 w-8 text-blue-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">Active Projects</p>
+                      <p className="text-2xl font-bold text-white">3</p> {/* Placeholder */}
+                    </div>
+                    <Briefcase className="h-8 w-8 text-amber-400" />
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Recent Activity */}
+            {/* Content Performance Trends Chart - Placeholder for now */}
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2 text-white">
-                  <Activity className="h-5 w-5 text-indigo-400" />
-                  <span>Recent Activity</span>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <LineChart className="h-5 w-5 text-blue-400" />
+                  <span>Content Performance Trends</span>
                 </CardTitle>
-                <CardDescription className="text-slate-400">Latest updates and content changes</CardDescription>
+                <CardDescription className="text-slate-400">Monthly overview of content engagement and reach</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80 flex items-center justify-center text-slate-400">
+                  <p>Content performance chart coming soon!</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Content Pieces - Placeholder for now */}
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <BookOpen className="h-5 w-5 text-blue-400" />
+                  <span>Recent Content Pieces</span>
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Overview of your latest content pieces
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {contentResults.slice(0, 5).map((item) => (
-                    <div key={item.id} className="flex items-center space-x-4 p-4 bg-slate-900/50 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        {getContentTypeIcon(item.type)}
-                        <div>
-                          <p className="font-medium text-white">{item.title}</p>
-                          <p className="text-sm text-slate-400">
-                            {item.client} • {item.assignee}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="ml-auto flex items-center space-x-2">
-                        <Badge variant="outline" className={getStatusColor(item.status)}>
-                          {item.status}
-                        </Badge>
-                        <span className="text-sm text-slate-500">{item.createdAt.toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  ))}
+                  <p className="text-slate-400">Recent content pieces will appear here.</p>
+                </div>
+                <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700" onClick={() => onSectionChange?.("content-creation")}>
+                  <PenTool className="h-4 w-4 mr-2" />
+                  Generate New Content
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+
+      case "content-creation": // This section is now for generating content pieces
+        return (
+          <div className="space-y-6">
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white">AI Content Generator</CardTitle>
+                <CardDescription className="text-slate-400">Generate content pieces (e.g., blog posts, social media updates)</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input
+                  placeholder="Describe the content piece you want to generate (e.g., 'a blog post about AI in marketing', '5 social media captions for a new product')..."
+                  className="border-slate-600 bg-slate-900/50 text-white"
+                  value={topicPrompt}
+                  onChange={(e) => setTopicPrompt(e.target.value)}
+                />
+                <Button
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  onClick={handleGenerateContentPieces}
+                  disabled={isGeneratingTopics || !topicPrompt.trim()}
+                >
+                  {isGeneratingTopics ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...
+                    </>
+                  ) : (
+                    <>
+                      <PenTool className="h-4 w-4 mr-2" />
+                      Generate Content Piece
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white">Generated Content Pieces</CardTitle>
+                <CardDescription className="text-slate-400">Review and approve AI-suggested content pieces</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {generatedContentIdeas.length > 0 ? (
+                    generatedContentIdeas.map((idea) => (
+                      <Card key={idea.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                        <CardContent className="p-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium text-white">{idea.title}</h4>
+                            <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
+                            <span>Type: {idea.type}</span>
+                            <span>Priority: {idea.priority}</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600"
+                              onClick={() => handleApproveIdea(idea.id)}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" /> Approve
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600"
+                              onClick={() => handleDeleteIdea(idea.id, "generated")}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" /> Delete
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-slate-400">No new content pieces. Generate some above!</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white">Approved Content Pieces</CardTitle>
+                <CardDescription className="text-slate-400">Content pieces ready for development or publication</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {approvedContentIdeas.length > 0 ? (
+                    approvedContentIdeas.map((idea) => (
+                      <Card key={idea.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                        <CardContent className="p-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium text-white">{idea.title}</h4>
+                            <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
+                            <span>Type: {idea.type}</span>
+                            <span>Priority: {idea.priority}</span>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full bg-red-600 hover:bg-red-700 text-white border-red-600"
+                            onClick={() => handleDeleteIdea(idea.id, "approved")}
+                          >
+                            <XCircle className="h-4 w-4 mr-2" /> Delete
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-slate-400">No approved content pieces yet.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
         )
 
-      case "workspace":
+      case "campaign-configuration": // This section will be for Content Studio specific configuration
         return (
           <div className="space-y-6">
-            {/* Project Configuration */}
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center space-x-2 text-white">
-                  <Building2 className="h-5 w-5 text-indigo-400" />
-                  <span>Project Configuration</span>
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                  Configure client parameters and content strategy
-                </CardDescription>
+              <CardHeader>
+                <CardTitle className="text-white">Content Studio Configuration</CardTitle>
+                <CardDescription className="text-slate-400">Configure AI module for content generation</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <Label htmlFor="client-select" className="text-sm font-medium text-slate-300 mb-2 block">
-                    Client Selection
-                  </Label>
-                  <Select value={selectedClient} onValueChange={setSelectedClient}>
-                    <SelectTrigger className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-indigo-400">
-                      <SelectValue placeholder="Choose your client" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-600 bg-slate-800">
-                      {clients.map((client) => (
-                        <SelectItem key={client.id} value={client.name} className="py-3 text-white">
-                          <div className="flex items-center space-x-3 w-full">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={client.avatar || "/placeholder.svg"} />
-                              <AvatarFallback className="bg-indigo-600 text-white text-xs font-medium">
-                                {client.name.slice(0, 2)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="font-medium text-white">{client.name}</div>
-                              <div className="text-xs text-slate-400 flex items-center space-x-2">
-                                <span>{client.industry}</span>
-                                <span>•</span>
-                                <span className="flex items-center">
-                                  <Star className="h-3 w-3 text-amber-400 mr-1" />
-                                  {client.satisfaction}
-                                </span>
-                              </div>
-                            </div>
-                            <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
-                              {client.tier}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="niche-select" className="text-sm font-medium text-slate-300 mb-2 block">
-                    Target Niche
-                  </Label>
-                  <Select value={selectedNiche} onValueChange={setSelectedNiche}>
-                    <SelectTrigger className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-indigo-400">
-                      <SelectValue placeholder="Select content niche" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-600 bg-slate-800">
-                      {niches.map((niche) => (
-                        <SelectItem key={niche.value} value={niche.value} className="py-2 text-white">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-lg">{niche.icon}</span>
-                            <span className="font-medium">{niche.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Content Results */}
-            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center space-x-2 text-white">
-                      <TrendingUp className="h-5 w-5 text-indigo-400" />
-                      <span>Generated Content</span>
-                    </CardTitle>
-                    <CardDescription className="text-slate-400">
-                      AI-generated content ready for review and optimization
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center space-x-2">
-                      <Search className="h-4 w-4 text-slate-400" />
-                      <Input
-                        placeholder="Search content..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-64 h-9 border-slate-600 bg-slate-900/50 text-white"
-                      />
-                    </div>
-                    <Select value={filterStatus} onValueChange={setFilterStatus}>
-                      <SelectTrigger className="w-40 h-9 border-slate-600 bg-slate-900/50 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="border-slate-600 bg-slate-800">
-                        <SelectItem value="all" className="text-white">
-                          All Status
-                        </SelectItem>
-                        <SelectItem value="pending" className="text-white">
-                          Pending
-                        </SelectItem>
-                        <SelectItem value="approved" className="text-white">
-                          Approved
-                        </SelectItem>
-                        <SelectItem value="in-review" className="text-white">
-                          In Review
-                        </SelectItem>
-                        <SelectItem value="revision" className="text-white">
-                          Revision
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {filteredResults.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="p-4 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                      <Bot className="h-10 w-10 text-indigo-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Ready to Create Amazing Content</h3>
-                    <p className="text-slate-400 max-w-md mx-auto">
-                      Configure your project settings and start a conversation with our AI Content Strategist to
-                      generate professional content.
-                    </p>
-                  </div>
-                ) : (
-                  filteredResults.map((result) => (
-                    <div key={result.id} className="border border-slate-700 rounded-xl p-6 bg-slate-900/50">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-3">
-                            <div className="flex items-center space-x-2">
-                              {getContentTypeIcon(result.type)}
-                              <h3 className="font-semibold text-white text-lg">{result.title}</h3>
-                            </div>
-                            <Badge variant="outline" className={getStatusColor(result.status)}>
-                              {getStatusIcon(result.status)}
-                              <span className="ml-1 capitalize">{result.status.replace("-", " ")}</span>
-                            </Badge>
-                            <Badge className={getPriorityColor(result.priority)} variant="secondary">
-                              {result.priority}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center space-x-6 text-sm text-slate-400 mb-4">
-                            <span className="flex items-center space-x-1">
-                              <Building2 className="h-4 w-4" />
-                              <span className="font-medium">{result.client}</span>
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <Target className="h-4 w-4" />
-                              <span>{result.niche}</span>
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <User className="h-4 w-4" />
-                              <span>{result.assignee}</span>
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>{result.createdAt.toLocaleDateString()}</span>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-slate-800/50 rounded-lg p-5 border border-slate-700 mb-5">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-4 text-xs text-slate-500">
-                            <span>{result.wordCount} words</span>
-                            <span>•</span>
-                            <span>{result.estimatedTime}</span>
-                          </div>
-                          <Button variant="ghost" size="sm" className="h-6 text-slate-400 hover:text-white">
-                            <Eye className="h-3 w-3 mr-1" />
-                            Preview
-                          </Button>
-                        </div>
-                        <div className="prose prose-sm max-w-none">
-                          <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">{result.content}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleContentAction(result.id, "approve")}
-                            className="text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Approve
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleContentAction(result.id, "in-review")}
-                            className="text-blue-400 border-blue-500/30 hover:bg-blue-500/20"
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Review
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleContentAction(result.id, "revision")}
-                            className="text-amber-400 border-amber-500/30 hover:bg-amber-500/20"
-                          >
-                            <RotateCcw className="h-4 w-4 mr-1" />
-                            Revise
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleContentAction(result.id, "reject")}
-                            className="text-red-400 border-red-500/30 hover:bg-red-500/20"
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Reject
-                          </Button>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                            <Download className="h-4 w-4 mr-1" />
-                            Export
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                            <Share2 className="h-4 w-4 mr-1" />
-                            Share
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
+              <CardContent>
+                <AgentForm department={department} onClose={onBack} />
               </CardContent>
             </Card>
           </div>
@@ -695,15 +581,15 @@ Your content will be ready for review in the workspace. I've optimized it for ma
           <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2 text-white">
-                <Sparkles className="h-5 w-5 text-indigo-400" />
+                <Sparkles className="h-5 w-5 text-purple-400" /> {/* Updated icon */}
                 <span>Content Studio Section</span>
               </CardTitle>
               <CardDescription className="text-slate-400">This section is under development</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-16">
-                <div className="p-4 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                  <Sparkles className="h-10 w-10 text-indigo-400" />
+                <div className="p-4 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                  <Sparkles className="h-10 w-10 text-purple-400" /> {/* Updated icon */}
                 </div>
                 <h3 className="text-lg font-semibold text-white mb-2">Coming Soon</h3>
                 <p className="text-slate-400 max-w-md mx-auto">
@@ -724,22 +610,30 @@ Your content will be ready for review in the workspace. I've optimized it for ma
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2.5 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl shadow-lg">
-                  <Sparkles className="h-5 w-5 text-white" />
+                <div className="p-2.5 bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-600 rounded-xl shadow-lg"> {/* Updated colors */}
+                  <Sparkles className="h-5 w-5 text-white" /> {/* Updated icon */}
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-white">Content Studio</h1>
-                  <p className="text-sm text-slate-400">AI-Powered Content Creation & Workflow Management</p>
+                  <h1 className="text-xl font-semibold text-white">Content Studio</h1> {/* Updated title */}
+                  <p className="text-sm text-slate-400">AI-Powered Content Generation & Workflow</p> {/* Updated description */}
                 </div>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Badge className="bg-indigo-500/20 text-indigo-300 border-indigo-500/30 font-medium">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700"
+                onClick={onBack}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
+              </Button>
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30 font-medium"> {/* Updated colors */}
                 <Zap className="h-3 w-3 mr-1" />
                 AI Enabled
               </Badge>
               <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-medium">
-                {contentResults.filter((r) => r.status === "pending").length} Pending Review
+                {approvedContentIdeas.length} Approved Pieces {/* Updated text */}
               </Badge>
               <Button
                 variant="outline"
@@ -761,15 +655,87 @@ Your content will be ready for review in the workspace. I've optimized it for ma
 
           {/* AI Assistant Panel */}
           <div className="w-96 bg-slate-900/95 backdrop-blur-md border-l border-slate-700/50 shadow-lg flex flex-col">
+            {/* Client and Niche Selection */}
+            <div className="p-6 border-b border-slate-700/50">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="client-select-ai" className="text-sm font-medium text-slate-300 mb-2 block">
+                    Select Client
+                  </Label>
+                  <Select value={selectedClient || ""} onValueChange={setSelectedClient}>
+                    <SelectTrigger id="client-select-ai" className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400">
+                      <SelectValue placeholder="Choose a client" />
+                    </SelectTrigger>
+                    <SelectContent className="border-slate-600 bg-slate-800">
+                      {clients.length === 0 ? (
+                        <SelectItem value="no-clients" disabled>No clients available</SelectItem>
+                      ) : (
+                        clients.map((client) => (
+                          <SelectItem key={client.id} value={client.name} className="py-3 text-white">
+                            <div className="flex items-center space-x-3 w-full">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={client.avatar || "/placeholder.svg"} />
+                                <AvatarFallback className="bg-blue-600 text-white text-xs font-medium">
+                                  {client.name.slice(0, 2)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="font-medium text-white">{client.name}</div>
+                                <div className="text-xs text-slate-400 flex items-center space-x-2">
+                                  <span>{client.industry}</span>
+                                  <span>•</span>
+                                  <span className="flex items-center">
+                                    <Star className="h-3 w-3 text-amber-400 mr-1" />
+                                    {client.satisfaction}
+                                  </span>
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
+                                {client.tier}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="niche-select-ai" className="text-sm font-medium text-slate-300 mb-2 block">
+                    Select Niche
+                  </Label>
+                  <Select value={selectedNiche || ""} onValueChange={setSelectedNiche}>
+                    <SelectTrigger id="niche-select-ai" className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400">
+                      <SelectValue placeholder="Select a niche" />
+                    </SelectTrigger>
+                    <SelectContent className="border-slate-600 bg-slate-800">
+                      {niches.length === 0 ? (
+                        <SelectItem value="no-niches" disabled>No niches available</SelectItem>
+                      ) : (
+                        niches.map((niche) => (
+                          <SelectItem key={niche.value} value={niche.value} className="py-2 text-white">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-lg">{niche.icon}</span>
+                              <span className="font-medium">{niche.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
             {/* AI Assistant Header */}
             <div className="p-6 border-b border-slate-700/50">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg"> {/* Updated colors */}
                   <Bot className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">AI Content Strategist</h3>
-                  <p className="text-sm text-slate-400">Your intelligent content assistant</p>
+                  <h3 className="text-lg font-semibold text-white">AI Content Assistant</h3> {/* Updated title */}
+                  <p className="text-sm text-slate-400">Your intelligent content creation partner</p> {/* Updated description */}
                 </div>
               </div>
             </div>
@@ -785,8 +751,8 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                     id="context-data"
                     value={contextData}
                     onChange={(e) => setContextData(e.target.value)}
-                    placeholder="Brand guidelines, target audience insights, campaign objectives..."
-                    className="min-h-[80px] border-slate-600 bg-slate-900/50 text-white focus:border-purple-400 resize-none text-sm"
+                    placeholder="Content goals, target audience, brand voice, key messages..."
+                    className="min-h-[80px] border-slate-600 bg-slate-900/50 text-white focus:border-blue-400 resize-none text-sm"
                   />
                 </div>
 
@@ -803,7 +769,7 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                         variant="outline"
                         size="sm"
                         onClick={() => handleFileUpload(item.type)}
-                        className="flex flex-col items-center p-3 h-auto border-slate-600 hover:border-purple-400 hover:bg-purple-500/20 bg-transparent text-slate-300"
+                        className="flex flex-col items-center p-3 h-auto border-slate-600 hover:border-blue-400 hover:bg-blue-500/20 bg-transparent text-slate-300"
                       >
                         <item.icon className="h-4 w-4 mb-1 text-slate-400" />
                         <span className="text-xs font-medium">{item.label}</span>
@@ -848,11 +814,11 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                     >
                       <Avatar className="h-7 w-7 flex-shrink-0">
                         {message.type === "user" ? (
-                          <AvatarFallback className="bg-indigo-600 text-white text-xs">
+                          <AvatarFallback className="bg-blue-600 text-white text-xs">
                             <User className="h-3 w-3" />
                           </AvatarFallback>
                         ) : (
-                          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs">
+                          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white text-xs"> {/* Updated colors */}
                             <Bot className="h-3 w-3" />
                           </AvatarFallback>
                         )}
@@ -860,7 +826,7 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                       <div
                         className={`p-3 rounded-xl text-sm ${
                           message.type === "user"
-                            ? "bg-indigo-600 text-white"
+                            ? "bg-blue-600 text-white"
                             : "bg-slate-800/50 text-slate-300 border border-slate-700"
                         }`}
                       >
@@ -871,7 +837,7 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                               <div
                                 key={index}
                                 className={`text-xs flex items-center space-x-1 ${
-                                  message.type === "user" ? "text-indigo-200" : "text-slate-500"
+                                  message.type === "user" ? "text-blue-200" : "text-slate-500"
                                 }`}
                               >
                                 <Paperclip className="h-3 w-3" />
@@ -880,7 +846,7 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                             ))}
                           </div>
                         )}
-                        <p className={`text-xs mt-2 ${message.type === "user" ? "text-indigo-200" : "text-slate-500"}`}>
+                        <p className={`text-xs mt-2 ${message.type === "user" ? "text-blue-200" : "text-slate-500"}`}>
                           {message.timestamp.toLocaleTimeString()}
                         </p>
                       </div>
@@ -892,7 +858,7 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                   <div className="flex justify-start">
                     <div className="flex items-start space-x-3">
                       <Avatar className="h-7 w-7">
-                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white"> {/* Updated colors */}
                           <Bot className="h-3 w-3" />
                         </AvatarFallback>
                       </Avatar>
@@ -924,28 +890,15 @@ Your content will be ready for review in the workspace. I've optimized it for ma
                     onChange={(e) => setInputMessage(e.target.value)}
                     placeholder="Describe your content requirements..."
                     onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
-                    className="flex-1 border-slate-600 bg-slate-900/50 text-white focus:border-indigo-400 text-sm"
-                    disabled={!selectedClient || !selectedNiche}
+                    className="flex-1 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400 text-sm"
                   />
                   <Button
                     onClick={handleSendMessage}
-                    disabled={
-                      (!inputMessage.trim() && attachedFiles.length === 0) ||
-                      isTyping ||
-                      !selectedClient ||
-                      !selectedNiche
-                    }
-                    className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-4"
-                  >
+                    disabled={!inputMessage.trim() && attachedFiles.length === 0 || isTyping}
+                    className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 px-4"> {/* Updated colors */}
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
-                {(!selectedClient || !selectedNiche) && (
-                  <div className="flex items-center space-x-2 text-xs text-amber-400 bg-amber-500/20 p-2 rounded-lg border border-amber-500/30">
-                    <AlertCircle className="h-3 w-3" />
-                    <span>Please configure your project to enable AI assistance</span>
-                  </div>
-                )}
               </div>
             </div>
           </div>
