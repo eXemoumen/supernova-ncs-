@@ -14,6 +14,8 @@ import Finance from "@/components/departments/finance"
 import Operations from "@/components/departments/operations"
 import AuthForm from "@/components/auth-form" // Import the AuthForm component
 import { supabase } from "../lib/supabaseClient" // Import supabase client
+import Clients from "@/components/departments/clients"
+import Email from "@/components/departments/email"
 
 const departments = [
   {
@@ -92,6 +94,8 @@ const departmentComponents = {
   hr: HR,
   finance: Finance,
   operations: Operations,
+  clients:Clients,
+  email:Email
 }
 
 export default function Dashboard() {
