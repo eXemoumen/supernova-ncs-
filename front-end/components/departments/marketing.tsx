@@ -46,6 +46,7 @@ import {
   DollarSign,
   LineChart,
   Star,
+  Loader2,
 } from "lucide-react"
 
 import { DepartmentChatbot } from "@/components/department-chatbot"
@@ -85,22 +86,22 @@ interface Campaign {
 }
 
 interface ContentIdea {
-  id: number
-  title: string
-  type: "blog" | "social" | "email" | "video"
-  status: "new" | "in-progress" | "approved"
-  priority: "low" | "medium" | "high"
-  client: string
-  niche: string
+  id: string;
+  title: string;
+  type: "blog" | "social" | "email" | "video" | "other"; // Added 'other' for flexibility
+  status: "new" | "approved" | "deleted";
+  priority: "low" | "medium" | "high";
+  client?: string; // Optional, as AI might not always provide
+  niche?: string; // Optional
 }
 
 interface MarketingDataPoint {
-  month: string
-  revenue: number
-  spend: number
-  roi: number
-  client: string
-  niche: string
+  month: string;
+  revenue: number;
+  spend: number;
+  roi: number;
+  client: string;
+  niche: string;
 }
 
 export default function Marketing({
@@ -117,72 +118,37 @@ export default function Marketing({
         "Welcome to OmniDesk Marketing Hub! I'm your AI Marketing Strategist. I can help you with campaign management, content creation, and performance analysis. How can I assist you today?",
       timestamp: new Date(),
     },
-  ])
-  const [inputMessage, setInputMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const [attachedFiles, setAttachedFiles] = useState<string[]>([])
-  const [contextData, setContextData] = useState("")
-  const { toast } = useToast()
+  ]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
+  const [contextData, setContextData] = useState("");
+  const [topicPrompt, setTopicPrompt] = useState("");
+  const [generatedContentIdeas, setGeneratedContentIdeas] = useState<ContentIdea[]>([]);
+  const [approvedContentIdeas, setApprovedContentIdeas] = useState<ContentIdea[]>([]);
+  const [isGeneratingTopics, setIsGeneratingTopics] = useState(false);
+  const [generatedCampaigns, setGeneratedCampaigns] = useState<Campaign[]>([]);
+  const [isGeneratingCampaigns, setIsGeneratingCampaigns] = useState(false);
+  const { toast } = useToast();
 
   const [selectedClient, setSelectedClient] = useState("")
   const [selectedNiche, setSelectedNiche] = useState("")
-  const [clients, setClients] = useState<any[]>([]);
-  const [niches, setNiches] = useState<any[]>([]);
-  const [loadingClients, setLoadingClients] = useState(true);
-  const [loadingNiches, setLoadingNiches] = useState(true);
+  const [clients, setClients] = useState<any[]>([
+    { id: "client-a", name: "Client A", avatar: "/placeholder-user.jpg", industry: "Tech", satisfaction: 4.5, tier: "Premium" },
+    { id: "client-b", name: "Client B", avatar: "/placeholder-user.jpg", industry: "Retail", satisfaction: 3.8, tier: "Standard" },
+    { id: "client-c", name: "Client C", avatar: "/placeholder-user.jpg", industry: "Healthcare", satisfaction: 4.9, tier: "Enterprise" },
+  ]);
+  const [niches, setNiches] = useState<any[]>([
+    { value: "Digital Marketing", label: "Digital Marketing", icon: "📊" },
+    { value: "Technology", label: "Technology", icon: "💻" },
+    { value: "Healthcare", label: "Healthcare", icon: "⚕️" },
+    { value: "Finance", label: "Finance", icon: "💰" },
+    { value: "Education", label: "Education", icon: "📚" },
+  ]);
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      setLoadingClients(true);
-      try {
-        const response = await fetch("/api/clients");
-        const data = await response.json();
-        setClients(data);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-      } finally {
-        setLoadingClients(false);
-      }
-    };
-
-    const fetchNiches = async () => {
-      setLoadingNiches(true);
-      try {
-        const response = await fetch("/api/niches");
-        const data = await response.json();
-        setNiches(data);
-      } catch (error) {
-        console.error("Error fetching niches:", error);
-      } finally {
-        setLoadingNiches(false);
-      }
-    };
-
-    fetchClients();
-    fetchNiches();
-  }, []);
-
-  const campaigns: Campaign[] = [
-    { id: 1, name: "Summer Sale 2024", status: "active", performance: 85, budget: "$5,000", startDate: "2024-07-01", endDate: "2024-07-31", targetAudience: "Young Adults", channels: ["Social Media", "Email"], roi: 150, client: "Client A", niche: "Digital Marketing" },
-    { id: 2, name: "Product Launch", status: "draft", performance: 0, budget: "$8,000", startDate: "2024-08-15", endDate: "2024-09-15", targetAudience: "Tech Enthusiasts", channels: ["Website", "PR"], roi: 0, client: "Client B", niche: "Technology" },
-    { id: 3, name: "Brand Awareness", status: "completed", performance: 92, budget: "$3,500", startDate: "2024-05-01", endDate: "2024-05-31", targetAudience: "General Public", channels: ["Display Ads", "Content Marketing"], roi: 120, client: "Client A", niche: "Digital Marketing" },
-  ]
-
-  const contentIdeas: ContentIdea[] = [
-    { id: 1, title: "10 Tips for Better Productivity", type: "blog", status: "new", priority: "medium", client: "Client A", niche: "Digital Marketing" },
-    { id: 2, title: "Industry Trends Report 2024", type: "email", status: "in-progress", priority: "high", client: "Client B", niche: "Technology" },
-    { id: 3, title: "Customer Success Stories", type: "social", status: "approved", priority: "low", client: "Client A", niche: "Digital Marketing" },
-    { id: 4, title: "Behind the Scenes Content", type: "video", status: "new", priority: "medium", client: "Client C", niche: "Healthcare" },
-  ]
-
-  const marketingData: MarketingDataPoint[] = [
-    { month: "Jan", revenue: 65000, spend: 25000, roi: 160, client: "Client A", niche: "Digital Marketing" },
-    { month: "Feb", revenue: 70000, spend: 28000, roi: 150, client: "Client A", niche: "Digital Marketing" },
-    { month: "Mar", revenue: 75000, spend: 30000, roi: 150, client: "Client B", niche: "Technology" },
-    { month: "Apr", revenue: 80000, spend: 32000, roi: 150, client: "Client B", niche: "Technology" },
-    { month: "May", revenue: 85000, spend: 34000, roi: 150, client: "Client A", niche: "Digital Marketing" },
-    { month: "Jun", revenue: 90000, spend: 36000, roi: 150, client: "Client C", niche: "Healthcare" },
-  ]
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [contentIdeas, setContentIdeas] = useState<ContentIdea[]>([]);
+  const [marketingData, setMarketingData] = useState<MarketingDataPoint[]>([]);
 
   const filteredCampaigns = campaigns.filter(campaign => {
     return (!selectedClient || campaign.client === selectedClient) &&
@@ -254,6 +220,98 @@ export default function Marketing({
       setIsTyping(false);
     }
   }
+
+  const handleGenerateTopics = async () => {
+    if (!topicPrompt.trim()) return;
+
+    setIsGeneratingTopics(true);
+    setGeneratedContentIdeas([]); // Clear previous topics
+
+    try {
+      const response = await fetch("/api/generate-topic", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: topicPrompt,
+          client: selectedClient,
+          niche: selectedNiche,
+          brief: contextData,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const parsedTopics = data.topics.split('\n').map((line: string) => line.replace(/^\d+\.\s*/, '')).filter((line: string) => line.trim() !== '');
+      const newContentIdeas: ContentIdea[] = parsedTopics.map((topic: string) => ({
+        id: `idea-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: topic,
+        type: "other", // Default type, can be refined later
+        status: "new",
+        priority: "medium", // Default priority, can be refined later
+        client: selectedClient,
+        niche: selectedNiche,
+      }));
+      setGeneratedContentIdeas(prev => [...prev, ...newContentIdeas]);
+    } catch (error) {
+      console.error("Error generating topics:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate topics. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingTopics(false);
+    }
+  };
+
+  const handleApproveIdea = (id: string) => {
+    setGeneratedContentIdeas(prev => {
+      const ideaToApprove = prev.find(idea => idea.id === id);
+      if (ideaToApprove) {
+        const updatedIdea = { ...ideaToApprove, status: "approved" };
+        setApprovedContentIdeas(approvedPrev => [...approvedPrev, updatedIdea]);
+        toast({
+          title: "Idea Approved",
+          description: `"${ideaToApprove.title}" has been approved.`, 
+        });
+        return prev.filter(idea => idea.id !== id);
+      }
+      return prev;
+    });
+  };
+
+  const handleDeleteIdea = (id: string, section: "generated" | "approved") => {
+    if (section === "generated") {
+      setGeneratedContentIdeas(prev => {
+        const ideaToDelete = prev.find(idea => idea.id === id);
+        if (ideaToDelete) {
+          toast({
+            title: "Idea Deleted",
+            description: `"${ideaToDelete.title}" has been deleted.`, 
+          });
+          return prev.filter(idea => idea.id !== id);
+        }
+        return prev;
+      });
+    } else if (section === "approved") {
+      setApprovedContentIdeas(prev => {
+        const ideaToDelete = prev.find(idea => idea.id === id);
+        if (ideaToDelete) {
+          toast({
+            title: "Idea Deleted",
+            description: `"${ideaToDelete.title}" has been deleted from approved ideas.`, 
+          });
+          return prev.filter(idea => idea.id !== id);
+        }
+        return prev;
+      });
+    }
+  };
 
   const handleFileUpload = (type: string) => {
     const fileName = `${type}-${Date.now()}.${type === "image" ? "jpg" : type === "video" ? "mp4" : "pdf"}`
@@ -468,39 +526,110 @@ export default function Marketing({
               </CardHeader>
               <CardContent className="space-y-4">
                 <Input
-                  placeholder="Enter topic or keyword..."
+                  placeholder="Enter keywords or a brief description for topic generation..."
                   className="border-slate-600 bg-slate-900/50 text-white"
+                  value={topicPrompt}
+                  onChange={(e) => setTopicPrompt(e.target.value)}
                 />
-                <Textarea
-                  placeholder="Describe your content requirements..."
-                  className="border-slate-600 bg-slate-900/50 text-white"
-                />
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                  <PenTool className="h-4 w-4 mr-2" />
-                  Generate Content
+                <Button
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  onClick={handleGenerateTopics}
+                  disabled={isGeneratingTopics || !topicPrompt.trim()}
+                >
+                  {isGeneratingTopics ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating...
+                    </>
+                  ) : (
+                    <>
+                      <PenTool className="h-4 w-4 mr-2" />
+                      Generate Topics
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
 
             <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-white">Content Ideas</CardTitle>
-                <CardDescription className="text-slate-400">AI-suggested content topics</CardDescription>
+                <CardTitle className="text-white">Generated Content Ideas</CardTitle>
+                <CardDescription className="text-slate-400">Review and approve AI-suggested content topics</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {filteredContentIdeas.map((idea, index) => (
-                    <div key={idea.id} className="p-3 bg-slate-900/50 rounded-lg text-sm text-slate-300">
-                      <div className="flex items-center justify-between">
-                        <span>{idea.title}</span>
-                        <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-slate-400 mt-1">
-                        <span>Type: {idea.type}</span>
-                        <span>Priority: {idea.priority}</span>
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-3">
+                  {generatedContentIdeas.length > 0 ? (
+                    generatedContentIdeas.map((idea) => (
+                      <Card key={idea.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                        <CardContent className="p-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium text-white">{idea.title}</h4>
+                            <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
+                            <span>Type: {idea.type}</span>
+                            <span>Priority: {idea.priority}</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600"
+                              onClick={() => handleApproveIdea(idea.id)}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" /> Approve
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600"
+                              onClick={() => handleDeleteIdea(idea.id, "generated")}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" /> Delete
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-slate-400">No new content ideas. Generate some above!</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white">Approved Content Ideas</CardTitle>
+                <CardDescription className="text-slate-400">Ideas ready for development</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {approvedContentIdeas.length > 0 ? (
+                    approvedContentIdeas.map((idea) => (
+                      <Card key={idea.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+                        <CardContent className="p-0">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium text-white">{idea.title}</h4>
+                            <Badge className={getStatusColor(idea.status)}>{idea.status}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
+                            <span>Type: {idea.type}</span>
+                            <span>Priority: {idea.priority}</span>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full bg-red-600 hover:bg-red-700 text-white border-red-600"
+                            onClick={() => handleDeleteIdea(idea.id, "approved")}
+                          >
+                            <XCircle className="h-4 w-4 mr-2" /> Delete
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <p className="text-slate-400">No approved content ideas yet.</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -605,9 +734,7 @@ export default function Marketing({
                       <SelectValue placeholder="Choose a client" />
                     </SelectTrigger>
                     <SelectContent className="border-slate-600 bg-slate-800">
-                      {loadingClients ? (
-                        <SelectItem value="loading" disabled>Loading clients...</SelectItem>
-                      ) : clients.length === 0 ? (
+                      {clients.length === 0 ? (
                         <SelectItem value="no-clients" disabled>No clients available</SelectItem>
                       ) : (
                         clients.map((client) => (
@@ -650,9 +777,7 @@ export default function Marketing({
                       <SelectValue placeholder="Select a niche" />
                     </SelectTrigger>
                     <SelectContent className="border-slate-600 bg-slate-800">
-                      {loadingNiches ? (
-                        <SelectItem value="loading" disabled>Loading niches...</SelectItem>
-                      ) : niches.length === 0 ? (
+                      {niches.length === 0 ? (
                         <SelectItem value="no-niches" disabled>No niches available</SelectItem>
                       ) : (
                         niches.map((niche) => (
