@@ -133,7 +133,22 @@ export function GlobalSidebar({
       description: "Project management",
       count: 7,
       restricted: false,
+    }, {
+      id: "clients",
+      name: "Clients",
+      icon: User,
+      description: "Client management",
+      count: null,
+      restricted: false,
     },
+    {
+      id: "email",
+      name: "Email",
+      icon: Mail,
+      description: "Email management",
+      count: null,
+      restricted: false,
+    }
   ]
 
   const studioSections = [
@@ -192,22 +207,7 @@ export function GlobalSidebar({
       icon: Activity,
       description: "Latest updates",
       count: null,
-    }, {
-      id: "clients",
-      name: "Clients",
-      icon: User,
-      description: "Client management",
-      count: null,
-      restricted: false,
     },
-    {
-      id: "email",
-      name: "Email",
-      icon: Mail,
-      description: "Email management",
-      count: null,
-      restricted: false,
-    }
   ]
 
   const quickActions = [
