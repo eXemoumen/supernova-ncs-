@@ -105,7 +105,7 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
       setLoadingRevenue(true);
       try {
         // Replace with your actual backend API endpoint
-        const response = await fetch(`http://localhost:3001/api/dashboard/revenue?timeframe=${selectedTimeframe}`);
+        const response = await fetch(`/api/dashboard/revenue?timeframe=${selectedTimeframe}`);
         const data = await response.json();
         setRevenueData(data);
       } catch (error) {
@@ -128,7 +128,7 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
       setLoadingDepartmentPerformance(true);
       try {
         // Replace with your actual backend API endpoint
-        const response = await fetch(`http://localhost:3001/api/dashboard/department-performance?timeframe=${selectedTimeframe}`);
+        const response = await fetch(`/api/dashboard/department-performance?timeframe=${selectedTimeframe}`);
         const data = await response.json();
         setDepartmentPerformance(data);
       } catch (error) {
@@ -151,7 +151,7 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
       setLoadingAiInsights(true);
       try {
         // Replace with your actual backend API endpoint
-        const response = await fetch(`http://localhost:3001/api/dashboard/ai-insights?timeframe=${selectedTimeframe}`);
+        const response = await fetch(`/api/dashboard/ai-insights?timeframe=${selectedTimeframe}`);
         const data = await response.json();
         setAiInsights(data);
       } catch (error) {
@@ -174,7 +174,7 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
       setLoadingKpiMetrics(true);
       try {
         // Replace with your actual backend API endpoint
-        const response = await fetch(`http://localhost:3001/api/dashboard/kpi-metrics?timeframe=${selectedTimeframe}`);
+        const response = await fetch(`/api/dashboard/kpi-metrics?timeframe=${selectedTimeframe}`);
         const data = await response.json();
         setKpiMetrics(data);
       } catch (error) {
