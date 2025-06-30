@@ -366,8 +366,7 @@ const handleItemClick = (id: string, type: "department" | "section") => {
       className={`${
         isExpanded ? "w-80" : "w-16"
       } bg-slate-900/95 backdrop-blur-md border-r border-slate-700/50 shadow-2xl transition-all duration-300 ease-in-out flex flex-col relative z-40`}
-      onMouseEnter={() => setIsExpandedState(true)}
-      onMouseLeave={() => setIsExpandedState(false)}
+
     >
       {/* Header */}
       <div className="p-4 border-b border-slate-700/50">
