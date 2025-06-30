@@ -1,14 +1,14 @@
 "use client"
 
-import { useState,useEffect } from "react"
-import { useTheme } from "next-themes" // Import useTheme
+import { useState, useEffect } from "react"
+import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch" // Import Switch component
-import { Label } from "@/components/ui/label" // Import Label component
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 import {
   BarChart3,
   MessageSquare,
@@ -34,7 +34,11 @@ import {
   Moon,
   Settings,
   Target,
-  PenTool
+  PenTool,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Mail
 } from "lucide-react"
 import { supabase } from "../lib/supabaseClient"
 
@@ -56,13 +60,14 @@ export function GlobalSidebar({
   setIsExpanded,
 }: GlobalSidebarProps) {
   
-  const [isExpanded, setIsExpandedState] = useState(defaultExpanded); // Use local state for expansion
+  const [isExpanded, setIsExpandedState] = useState(defaultExpanded);
+  const [expandedMarketing, setExpandedMarketing] = useState(false);
 
-  // Update local state when defaultExpanded prop changes
   useEffect(() => {
     setIsExpandedState(defaultExpanded);
   }, [defaultExpanded]);
-  const { theme, setTheme } = useTheme(); // Initialize useTheme hook
+  
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -187,7 +192,22 @@ export function GlobalSidebar({
       icon: Activity,
       description: "Latest updates",
       count: null,
+    }, {
+      id: "clients",
+      name: "Clients",
+      icon: User,
+      description: "Client management",
+      count: null,
+      restricted: false,
     },
+    {
+      id: "email",
+      name: "Email",
+      icon: Mail,
+      description: "Email management",
+      count: null,
+      restricted: false,
+    }
   ]
 
   const quickActions = [
@@ -199,7 +219,7 @@ export function GlobalSidebar({
 
   const marketingSections = [
     {
-      id: "dashboard",
+      id: "marketing-dashboard",
       name: "Marketing Dashboard",
       icon: BarChart3,
       description: "Overview of marketing performance",
@@ -228,62 +248,117 @@ export function GlobalSidebar({
     },
   ]
 
-  const handleItemClick = (id: string, type: "department" | "section") => {
+const handleItemClick = (id: string, type: "department" | "section") => {
     if (type === "department") {
-      onDepartmentChange?.(id)
+      if (id === "marketing") {
+        if (currentDepartment === "marketing") {
+          setExpandedMarketing(!expandedMarketing);
+        } else {
+          onDepartmentChange?.(id);
+          setExpandedMarketing(true);
+        }
+      } else {
+        onDepartmentChange?.(id);
+        setExpandedMarketing(false);
+      }
     } else {
-      onSectionChange?.(id)
+      onSectionChange?.(id);
     }
   }
 
   const renderNavigationItems = () => {
-    const sectionsToRender = currentDepartment === "marketing" ? marketingSections : departments;
-
     return (
       <div className="space-y-1 px-3">
-        {sectionsToRender.map((item) => {
+        {departments.map((item) => {
           const Icon = item.icon;
-          const isActive = (currentDepartment === "marketing" && activeSection === item.id) ||
-                           (currentDepartment !== "marketing" && (currentDepartment === item.id || (item.id === "dashboard" && !currentDepartment)));
+          const isActive = currentDepartment === item.id || 
+                         (item.id === "dashboard" && !currentDepartment);
+          const isMarketing = item.id === "marketing";
+          
           return (
-            <Button
-              key={item.id}
-              variant={isActive ? "secondary" : "ghost"}
-              size="sm"
-              className={`w-full justify-start h-auto p-3 ${
-                isActive
-                  ? "bg-slate-700 text-white border-slate-600"
-                  : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-              } ${!isExpanded ? "px-3" : ""}`}
-              onClick={() => handleItemClick(item.id, currentDepartment === "marketing" ? "section" : "department")}
-            >
-              <div className="relative">
-                <Icon
-                  className={`h-5 w-5 ${!isExpanded ? "" : "mr-3"} flex-shrink-0 ${item.restricted ? "text-amber-400" : ""}`}
-                />
-                {item.count !== null && item.count > 0 && !isExpanded && (
-                  <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {item.count > 99 ? "99" : item.count}
-                  </div>
-                )}
-              </div>
-              {isExpanded && (
-                <>
-                  <div className="flex-1 text-left">
-                    <div className="font-medium flex items-center">
-                      {item.name}
-                      {item.restricted && <Crown className="h-3 w-3 ml-2 text-amber-400" />}
+            <div key={item.id} className="space-y-1">
+              <Button
+                variant={isActive && !(isMarketing && expandedMarketing) ? "secondary" : "ghost"}
+                size="sm"
+                className={`w-full justify-start h-auto p-3 ${
+                  isActive && !(isMarketing && expandedMarketing)
+                    ? "bg-slate-700 text-white border-slate-600"
+                    : "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                } ${!isExpanded ? "px-3" : ""}`}
+                onClick={() => handleItemClick(item.id, "department")}
+              >
+                <div className="relative">
+                  <Icon
+                    className={`h-5 w-5 ${!isExpanded ? "" : "mr-3"} flex-shrink-0 ${item.restricted ? "text-amber-400" : ""}`}
+                  />
+                  {item.count !== null && item.count > 0 && !isExpanded && (
+                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                      {item.count > 99 ? "99" : item.count}
                     </div>
-                    <div className="text-xs opacity-70">{item.description}</div>
-                  </div>
-                  {item.count !== null && item.count > 0 && (
-                    <Badge variant="outline" className="ml-auto text-xs border-slate-600 text-slate-300">
-                      {item.count}
-                    </Badge>
                   )}
-                </>
+                </div>
+                {isExpanded && (
+                  <>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium flex items-center">
+                        {item.name}
+                        {item.restricted && <Crown className="h-3 w-3 ml-2 text-amber-400" />}
+                      </div>
+                      <div className="text-xs opacity-70">{item.description}</div>
+                    </div>
+                    {isMarketing && (
+                      <div className="ml-2">
+                        {expandedMarketing ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </div>
+                    )}
+                    {item.count !== null && item.count > 0 && !isMarketing && (
+                      <Badge variant="outline" className="ml-auto text-xs border-slate-600 text-slate-300">
+                        {item.count}
+                      </Badge>
+                    )}
+                  </>
+                )}
+              </Button>
+
+              {/* Marketing sub-sections */}
+              {isMarketing && expandedMarketing && currentDepartment === "marketing" && isExpanded && (
+                <div className="ml-4 pl-2 border-l border-slate-700 space-y-1">
+                  {marketingSections.map((section) => {
+                    const SectionIcon = section.icon;
+                    const isSectionActive = activeSection === section.id;
+                    
+                    return (
+                      <Button
+                        key={section.id}
+                        variant={isSectionActive ? "secondary" : "ghost"}
+                        size="sm"
+                        className={`w-full justify-start h-auto p-2 ${
+                          isSectionActive
+                            ? "bg-slate-700 text-white border-slate-600"
+                            : "text-slate-300 hover:text-white hover:bg-slate-700/50"
+                        }`}
+                        onClick={() => handleItemClick(section.id, "section")}
+                      >
+                        <SectionIcon className="h-4 w-4 mr-3 flex-shrink-0" />
+                        <div className="flex-1 text-left">
+                          <div className="font-medium">{section.name}</div>
+                          <div className="text-xs opacity-70">{section.description}</div>
+                        </div>
+                        {section.count !== null && section.count > 0 && (
+                          <Badge variant="outline" className="ml-auto text-xs border-slate-600 text-slate-300">
+                            {section.count}
+                          </Badge>
+                        )}
+                      </Button>
+                    );
+                  })}
+                </div>
               )}
-            </Button>
+            </div>
           );
         })}
       </div>

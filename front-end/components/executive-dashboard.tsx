@@ -35,6 +35,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
+import AddClientForm from "./add-client-form"
 
 interface ExecutiveDashboardProps {
   onDepartmentChange: (department: string) => void
@@ -306,16 +307,9 @@ export function ExecutiveDashboard({ onDepartmentChange }: ExecutiveDashboardPro
           <p className="text-slate-400 text-lg">Real-time insights and AI-powered recommendations</p>
         </div>
         <div className="flex items-center space-x-4">
-          <Link href="/add-client">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-slate-600 text-slate-300 hover:bg-slate-700 bg-transparent"
-            >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Add Client
-            </Button>
-          </Link>
+          
+            <AddClientForm/>
+          
           <div className="flex items-center space-x-2 bg-slate-800/50 rounded-lg p-2">
             {["7d", "30d", "90d", "1y"].map((period) => (
               <Button
