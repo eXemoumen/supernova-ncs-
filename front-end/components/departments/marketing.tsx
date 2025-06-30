@@ -47,6 +47,7 @@ import {
   LineChart,
   Star,
   Loader2,
+  ArrowLeft,
 } from "lucide-react"
 
 import { DepartmentChatbot } from "@/components/department-chatbot"
@@ -695,6 +696,14 @@ export default function Marketing({
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700"
+                onClick={onBack}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
+              </Button>
               <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 font-medium">
                 <Zap className="h-3 w-3 mr-1" />
                 AI Enabled

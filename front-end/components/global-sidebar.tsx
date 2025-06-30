@@ -1,14 +1,11 @@
 "use client"
 
 import { useState,useEffect } from "react"
-import { useTheme } from "next-themes" // Import useTheme
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Switch } from "@/components/ui/switch" // Import Switch component
-import { Label } from "@/components/ui/label" // Import Label component
 import {
   BarChart3,
   MessageSquare,
@@ -62,14 +59,9 @@ export function GlobalSidebar({
   useEffect(() => {
     setIsExpandedState(defaultExpanded);
   }, [defaultExpanded]);
-  const { theme, setTheme } = useTheme(); // Initialize useTheme hook
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-  }
-
-  const handleThemeToggle = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
   }
 
   const departments = [
@@ -359,36 +351,34 @@ export function GlobalSidebar({
       <ScrollArea className="flex-1 py-4">{renderNavigationItems()}</ScrollArea>
 
       {/* User Profile */}
-      <div className="p-4 border-t border-slate-700/50">
-        {isExpanded ? (
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-indigo-600 text-white text-sm font-medium">AJ</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white">Alex Johnson</p>
-              <p className="text-xs text-slate-400">Chief Executive</p>
+      <div className="mt-auto p-4 space-y-4">
+        <Separator className="bg-slate-700/50" />
+
+        {isExpanded && (
+          <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-semibold">
+                    JD
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold text-white">John Doe</p>
+                  <p className="text-xs text-slate-400">Administrator</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white" onClick={handleLogout}>
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
-            <div className="flex items-center space-x-2">
-              <Sun className="h-5 w-5 text-yellow-400" />
-              <Switch
-                checked={theme === "dark"}
-                onCheckedChange={handleThemeToggle}
-                id="theme-toggle"
-                className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-slate-700"
-              />
-              <Moon className="h-5 w-5 text-blue-400" />
-            </div>
-            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white" onClick={handleLogout}>
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
-        ) : (
-          <div className="flex justify-center">
-            <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-indigo-600 text-white text-sm font-medium">AJ</AvatarFallback>
-            </Avatar>
-          </div>
+        )}
+
+        {!isExpanded && (
+           <Button variant="ghost" size="icon" className="w-full text-slate-400 hover:text-white" onClick={handleLogout}>
+            <LogOut className="h-5 w-5" />
+          </Button>
         )}
       </div>
     </div>

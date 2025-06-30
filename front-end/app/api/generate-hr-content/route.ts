@@ -15,18 +15,9 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" }); // Using gemini-1.5-pro for consistency
 
-    const systemPrompt = `You are an AI Marketing Strategist for OmniDesk. Your task is to generate creative and relevant content topics based on the user's prompt and provided context.
-    Consider the following:
-    - Client: ${client || "Not specified"}
-    - Niche: ${niche || "Not specified"}
-    - Marketing Brief: ${brief || "No specific brief provided."}
-
-    Generate a list of 5-10 distinct content topics. Present them as a numbered list, like this:
-1. Topic One
-2. Topic Two
-3. Topic Three`;
+    const systemPrompt = `You are an AI HR Assistant for OmniDesk. Your task is to generate creative and relevant HR content based on the user's prompt and provided context.\n    Consider the following:\n    - Client: ${client || "Not specified"}\n    - Niche: ${niche || "Not specified"}\n    - HR Brief: ${brief || "No specific brief provided."}\n\n    Generate 3-5 distinct HR content pieces (e.g., policy drafts, job descriptions, performance review templates). Present them as a numbered list, like this:\n1. HR Content One\n2. HR Content Two\n3. HR Content Three`;
 
     console.log("Prompt sent to Gemini:", prompt);
     console.log("System Prompt sent to Gemini:", systemPrompt);
@@ -39,11 +30,11 @@ export async function POST(req: Request) {
         },
         {
           role: "model",
-          parts: [{ text: "Understood. I will generate content topics based on the provided information." }],
+          parts: [{ text: "Understood. I will generate HR content based on the provided information." }],
         },
       ],
       generationConfig: {
-        maxOutputTokens: 500,
+        maxOutputTokens: 1000,
       },
     });
 
@@ -57,11 +48,11 @@ export async function POST(req: Request) {
       console.error("Error during Gemini sendMessage:", geminiError);
       return NextResponse.json({ error: "Failed to get response from Gemini API during sendMessage" }, { status: 500 });
     }
-    console.log("Gemini raw response for topics:", text);
+    console.log("Gemini raw response for HR content:", text);
 
-    return NextResponse.json({ topics: text });
+    return NextResponse.json({ hrContent: text });
   } catch (error) {
-    console.error("Gemini Topic Generation API error:", error);
-    return NextResponse.json({ error: "Failed to generate topics from Gemini API" }, { status: 500 });
+    console.error("Gemini HR Content Generation API error:", error);
+    return NextResponse.json({ error: "Failed to generate HR content from Gemini API" }, { status: 500 });
   }
 }
