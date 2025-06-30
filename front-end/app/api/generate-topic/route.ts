@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const systemPrompt = `You are an AI Marketing Strategist for OmniDesk. Your task is to generate creative and relevant content topics based on the user's prompt and provided context.
     Consider the following:

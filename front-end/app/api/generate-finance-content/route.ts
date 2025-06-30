@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" }); // Using gemini-1.5-pro for consistency
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Using gemini-1.5-pro for consistency
 
     const systemPrompt = `You are an AI Finance Assistant for OmniDesk. Your task is to generate creative and relevant financial content based on the user's prompt and provided context.\n    Consider the following:\n    - Client: ${client || "Not specified"}\n    - Niche: ${niche || "Not specified"}\n    - Finance Brief: ${brief || "No specific brief provided."}\n\n    Generate 3-5 distinct financial content pieces (e.g., financial report outlines, budget plan drafts, expense analysis summaries). Present them as a numbered list, like this:\n1. Financial Content One\n2. Financial Content Two\n3. Financial Content Three`;
 

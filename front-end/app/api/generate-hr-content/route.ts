@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" }); // Using gemini-1.5-pro for consistency
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Using gemini-1.5-pro for consistency
 
     const systemPrompt = `You are an AI HR Assistant for OmniDesk. Your task is to generate creative and relevant HR content based on the user's prompt and provided context.\n    Consider the following:\n    - Client: ${client || "Not specified"}\n    - Niche: ${niche || "Not specified"}\n    - HR Brief: ${brief || "No specific brief provided."}\n\n    Generate 3-5 distinct HR content pieces (e.g., policy drafts, job descriptions, performance review templates). Present them as a numbered list, like this:\n1. HR Content One\n2. HR Content Two\n3. HR Content Three`;
 

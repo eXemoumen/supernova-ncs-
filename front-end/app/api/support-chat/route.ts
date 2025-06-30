@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" }); // Using gemini-1.5-pro for consistency
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Using gemini-1.5-pro for consistency
 
     const systemPrompt = `You are an AI Support Assistant for OmniDesk. Your goal is to provide insightful and actionable advice on customer support, ticket management, and knowledge base articles.\n    Consider the following context for your responses:\n    - Client: ${client || "Not specified"}\n    - Niche: ${niche || "Not specified"}\n    - Support Brief: ${context || "No specific brief provided."}\n\n    Always be professional, concise, and helpful. Focus on resolving customer issues, providing clear instructions, and suggesting relevant knowledge base content.`;
 

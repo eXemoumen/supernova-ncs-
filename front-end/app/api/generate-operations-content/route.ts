@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" }); // Using gemini-1.5-pro for consistency
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Using gemini-1.5-pro for consistency
 
     const systemPrompt = `You are an AI Operations Assistant for OmniDesk. Your task is to generate creative and relevant operations content based on the user's prompt and provided context.\n    Consider the following:\n    - Client: ${client || "Not specified"}\n    - Niche: ${niche || "Not specified"}\n    - Operations Brief: ${brief || "No specific brief provided."}\n\n    Generate 3-5 distinct operations content pieces (e.g., project plan outlines, workflow diagrams, resource allocation reports). Present them as a numbered list, like this:\n1. Operations Content One\n2. Operations Content Two\n3. Operations Content Three`;
 
