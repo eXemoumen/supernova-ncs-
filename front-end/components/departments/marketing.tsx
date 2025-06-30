@@ -128,7 +128,7 @@ interface MarketingDataPoint {
 export default function Marketing({
   onBackAction,
   department,
-  activeSection = "campaign-management",
+  activeSection = "dashboard",
   onSectionChange,
 }: MarketingProps) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -463,7 +463,166 @@ export default function Marketing({
 
   const renderMainContent = () => {
     switch (activeSection) {
-      
+      case "dashboard":
+        return (
+          <div className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">Active Campaigns</p>
+                      <p className="text-2xl font-bold text-white">
+                        {
+                          filteredCampaigns.filter((c) => c.status === "active")
+                            .length
+                        }
+                      </p>
+                    </div>
+                    <Target className="h-8 w-8 text-blue-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">Total ROI</p>
+                      <p className="text-2xl font-bold text-white">
+                        {filteredCampaigns.reduce((sum, c) => sum + c.roi, 0)}%
+                      </p>
+                    </div>
+                    <DollarSign className="h-8 w-8 text-green-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">Engagement Rate</p>
+                      <p className="text-2xl font-bold text-white">4.2%</p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-purple-400" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">Content Ideas</p>
+                      <p className="text-2xl font-bold text-white">
+                        {filteredContentIdeas.length}
+                      </p>
+                    </div>
+                    <PenTool className="h-8 w-8 text-amber-400" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Campaign Performance Trends Chart */}
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <LineChart className="h-5 w-5 text-blue-400" />
+                  <span>Marketing Performance Trends</span>
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Monthly overview of revenue, spend, and ROI
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RechartsLineChart data={filteredMarketingData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis dataKey="month" stroke="#9CA3AF" />
+                      <YAxis stroke="#9CA3AF" />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#1F2937",
+                          border: "1px solid #374151",
+                          borderRadius: "8px",
+                          color: "#F9FAFB",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#3B82F6"
+                        strokeWidth={3}
+                        name="Revenue"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="spend"
+                        stroke="#EF4444"
+                        strokeWidth={3}
+                        name="Spend"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="roi"
+                        stroke="#10B981"
+                        strokeWidth={3}
+                        name="ROI"
+                      />
+                    </RechartsLineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recent Campaigns */}
+            <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center space-x-2">
+                  <Target className="h-5 w-5 text-blue-400" />
+                  <span>Recent Campaigns</span>
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Overview of your latest marketing campaigns
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {filteredCampaigns.map((campaign) => (
+                    <div
+                      key={campaign.id}
+                      className="p-4 border border-slate-700 rounded-lg bg-slate-900/50"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium text-white">
+                          {campaign.name}
+                        </h3>
+                        <Badge className={getStatusColor(campaign.status)}>
+                          {campaign.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-slate-400">
+                        <span>Performance: {campaign.performance}%</span>
+                        <span>Budget: {campaign.budget}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => onSectionChange?.("campaign-management")}
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  View All Campaigns
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        );
 
       case "campaign-management":
         return (
@@ -516,7 +675,6 @@ export default function Marketing({
             </Card>
           </div>
         );
-
       case "content-creation":
         return (
           <div className="space-y-6">
@@ -671,7 +829,6 @@ export default function Marketing({
             </Card>
           </div>
         );
-
       case "campaign-configuration":
         return (
           <div className="space-y-6">
@@ -690,7 +847,6 @@ export default function Marketing({
             </Card>
           </div>
         );
-
       default:
         return (
           <Card className="bg-slate-800/50 border-slate-700/50 backdrop-blur-sm">
