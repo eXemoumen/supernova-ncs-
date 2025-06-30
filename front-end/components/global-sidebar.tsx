@@ -1,17 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
+import { useTheme } from "next-themes" // Import useTheme
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { Switch } from "@/components/ui/switch" // Import Switch component
+import { Label } from "@/components/ui/label" // Import Label component
 import {
   BarChart3,
   MessageSquare,
   Users,
   DollarSign,
-  Settings,
   Sparkles,
   Layout,
   Briefcase,
@@ -27,9 +29,14 @@ import {
   ChevronRight,
   Brain,
   Crown,
-  LogOut, // Import LogOut icon
+  LogOut,
+  Sun,
+  Moon,
+  Settings,
+  Target,
+  PenTool
 } from "lucide-react"
-import { supabase } from "../lib/supabaseClient" // Import supabase client
+import { supabase } from "../lib/supabaseClient"
 
 interface GlobalSidebarProps {
   activeSection?: string
@@ -37,7 +44,7 @@ interface GlobalSidebarProps {
   onDepartmentChange?: (department: string) => void
   currentDepartment?: string | null
   defaultExpanded?: boolean
-  setIsExpanded: (expanded: boolean) => void; // Add setIsExpanded prop
+  setIsExpanded: (expanded: boolean) => void;
 }
 
 export function GlobalSidebar({
@@ -48,11 +55,21 @@ export function GlobalSidebar({
   defaultExpanded = false,
   setIsExpanded,
 }: GlobalSidebarProps) {
-  const [isHovered, setIsHovered] = useState(false); // New state for hover
-  const isExpanded = defaultExpanded; // Use defaultExpanded as the source of truth
+  
+  const [isExpanded, setIsExpandedState] = useState(defaultExpanded); // Use local state for expansion
+
+  // Update local state when defaultExpanded prop changes
+  useEffect(() => {
+    setIsExpandedState(defaultExpanded);
+  }, [defaultExpanded]);
+  const { theme, setTheme } = useTheme(); // Initialize useTheme hook
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+  }
+
+  const handleThemeToggle = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
   }
 
   const departments = [
@@ -70,6 +87,7 @@ export function GlobalSidebar({
       icon: Sparkles,
       description: "AI content creation",
       count: 12,
+      restricted: false,
     },
     {
       id: "marketing",
@@ -77,6 +95,7 @@ export function GlobalSidebar({
       icon: BarChart3,
       description: "Campaign management",
       count: 8,
+      restricted: false,
     },
     {
       id: "support",
@@ -84,6 +103,7 @@ export function GlobalSidebar({
       icon: MessageSquare,
       description: "Customer support",
       count: 23,
+      restricted: false,
     },
     {
       id: "hr",
@@ -91,6 +111,7 @@ export function GlobalSidebar({
       icon: Users,
       description: "Employee management",
       count: 5,
+      restricted: false,
     },
     {
       id: "finance",
@@ -98,13 +119,15 @@ export function GlobalSidebar({
       icon: DollarSign,
       description: "Financial planning",
       count: null,
+      restricted: false,
     },
     {
       id: "operations",
       name: "Operations Hub",
-      icon: Settings,
+      icon: Brain,
       description: "Project management",
       count: 7,
+      restricted: false,
     },
   ]
 
@@ -174,6 +197,37 @@ export function GlobalSidebar({
     { id: "notifications", label: "Notifications", icon: Bell, color: "bg-amber-600" },
   ]
 
+  const marketingSections = [
+    {
+      id: "dashboard",
+      name: "Marketing Dashboard",
+      icon: BarChart3,
+      description: "Overview of marketing performance",
+      count: null,
+    },
+    {
+      id: "campaign-management",
+      name: "Campaign Management",
+      icon: Target,
+      description: "Manage and monitor campaigns",
+      count: 8,
+    },
+    {
+      id: "content-creation",
+      name: "Content Creation",
+      icon: PenTool,
+      description: "Generate content ideas and copy",
+      count: 156,
+    },
+    {
+      id: "campaign-configuration",
+      name: "Campaign Configuration",
+      icon: Settings,
+      description: "Configure AI modules for campaigns",
+      count: null,
+    },
+  ]
+
   const handleItemClick = (id: string, type: "department" | "section") => {
     if (type === "department") {
       onDepartmentChange?.(id)
@@ -183,15 +237,17 @@ export function GlobalSidebar({
   }
 
   const renderNavigationItems = () => {
-    // Default dashboard navigation
+    const sectionsToRender = currentDepartment === "marketing" ? marketingSections : departments;
+
     return (
       <div className="space-y-1 px-3">
-        {departments.map((dept) => {
-          const Icon = dept.icon
-          const isActive = currentDepartment === dept.id || (dept.id === "dashboard" && !currentDepartment)
+        {sectionsToRender.map((item) => {
+          const Icon = item.icon;
+          const isActive = (currentDepartment === "marketing" && activeSection === item.id) ||
+                           (currentDepartment !== "marketing" && (currentDepartment === item.id || (item.id === "dashboard" && !currentDepartment)));
           return (
             <Button
-              key={dept.id}
+              key={item.id}
               variant={isActive ? "secondary" : "ghost"}
               size="sm"
               className={`w-full justify-start h-auto p-3 ${
@@ -199,48 +255,48 @@ export function GlobalSidebar({
                   ? "bg-slate-700 text-white border-slate-600"
                   : "text-slate-300 hover:text-white hover:bg-slate-700/50"
               } ${!isExpanded ? "px-3" : ""}`}
-              onClick={() => handleItemClick(dept.id, "department")}
+              onClick={() => handleItemClick(item.id, currentDepartment === "marketing" ? "section" : "department")}
             >
               <div className="relative">
                 <Icon
-                  className={`h-5 w-5 ${!(isExpanded || isHovered) ? "" : "mr-3"} flex-shrink-0 ${dept.restricted ? "text-amber-400" : ""}`}
+                  className={`h-5 w-5 ${!isExpanded ? "" : "mr-3"} flex-shrink-0 ${item.restricted ? "text-amber-400" : ""}`}
                 />
-                {dept.count !== null && dept.count > 0 && !(isExpanded || isHovered) && (
+                {item.count !== null && item.count > 0 && !isExpanded && (
                   <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {dept.count > 99 ? "99" : dept.count}
+                    {item.count > 99 ? "99" : item.count}
                   </div>
                 )}
               </div>
-              {(isExpanded || isHovered) && (
+              {isExpanded && (
                 <>
                   <div className="flex-1 text-left">
                     <div className="font-medium flex items-center">
-                      {dept.name}
-                      {dept.restricted && <Crown className="h-3 w-3 ml-2 text-amber-400" />}
+                      {item.name}
+                      {item.restricted && <Crown className="h-3 w-3 ml-2 text-amber-400" />}
                     </div>
-                    <div className="text-xs opacity-70">{dept.description}</div>
+                    <div className="text-xs opacity-70">{item.description}</div>
                   </div>
-                  {dept.count !== null && dept.count > 0 && (
+                  {item.count !== null && item.count > 0 && (
                     <Badge variant="outline" className="ml-auto text-xs border-slate-600 text-slate-300">
-                      {dept.count}
+                      {item.count}
                     </Badge>
                   )}
                 </>
               )}
             </Button>
-          )
+          );
         })}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div
       className={`${
-        isExpanded || isHovered ? "w-80" : "w-16"
+        isExpanded ? "w-80" : "w-16"
       } bg-slate-900/95 backdrop-blur-md border-r border-slate-700/50 shadow-2xl transition-all duration-300 ease-in-out flex flex-col relative z-40`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => setIsExpandedState(true)}
+      onMouseLeave={() => setIsExpandedState(false)}
     >
       {/* Header */}
       <div className="p-4 border-b border-slate-700/50">
@@ -312,6 +368,16 @@ export function GlobalSidebar({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white">Alex Johnson</p>
               <p className="text-xs text-slate-400">Chief Executive</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Sun className="h-5 w-5 text-yellow-400" />
+              <Switch
+                checked={theme === "dark"}
+                onCheckedChange={handleThemeToggle}
+                id="theme-toggle"
+                className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-slate-700"
+              />
+              <Moon className="h-5 w-5 text-blue-400" />
             </div>
             <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />

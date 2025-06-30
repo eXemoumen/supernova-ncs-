@@ -12,7 +12,7 @@ import { X, Play, Save } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface AgentFormProps {
-  department: string
+  department: { name: string } | string
   onClose: () => void
 }
 
@@ -47,7 +47,7 @@ export function AgentForm({ department, onClose }: AgentFormProps) {
           <CardTitle className="flex items-center space-x-2">
             <span>Configure AI Module</span>
             <Badge variant="outline" className="capitalize">
-              {department}
+              {typeof department === "string" ? department : department.name}
             </Badge>
           </CardTitle>
           <CardDescription>Set up parameters and preferences for your AI automation</CardDescription>

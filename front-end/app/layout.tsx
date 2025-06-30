@@ -1,11 +1,12 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Montserrat } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { PlatformProvider } from "@/components/platform-provider"
+import { ThemeProvider } from "@/components/theme-provider" // Import ThemeProvider
 
-const inter = Inter({ subsets: ["latin"] })
+const montserrat = Montserrat({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "OmniDesk - Unified Business Platform",
@@ -20,11 +21,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <PlatformProvider>
-          {children}
-          <Toaster />
-        </PlatformProvider>
+      <body className={montserrat.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <PlatformProvider>
+            {children}
+            <Toaster />
+          </PlatformProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

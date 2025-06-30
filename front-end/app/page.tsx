@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { BarChart3, Users, DollarSign, MessageSquare, Settings, Sparkles } from "lucide-react"
+import { BarChart3, Users, DollarSign, MessageSquare, Sparkles, Brain } from "lucide-react"
 import { GlobalSidebar } from "@/components/global-sidebar"
 import { ExecutiveDashboard } from "@/components/executive-dashboard"
 import ContentStudio from "@/components/departments/content-studio"
@@ -53,7 +53,7 @@ const departments = [
     id: "hr",
     name: "HR Management",
     icon: Users,
-    color: "bg-purple-500",
+    color: "bg-green-500",
     description: "Employee management, recruitment, and performance tracking",
     features: ["Employee Onboarding", "Performance Reviews", "Recruitment", "Time Tracking"],
     status: "active",
@@ -64,7 +64,7 @@ const departments = [
     id: "finance",
     name: "Finance Control",
     icon: DollarSign,
-    color: "bg-amber-500",
+    color: "bg-purple-500",
     description: "Financial planning, expense tracking, and reporting",
     features: ["Expense Management", "Budget Planning", "Financial Reports", "Invoice Management"],
     status: "active",
@@ -74,7 +74,7 @@ const departments = [
   {
     id: "operations",
     name: "Operations Hub",
-    icon: Settings,
+    icon: Brain,
     color: "bg-orange-500",
     description: "Project management, workflow automation, and resource planning",
     features: ["Project Management", "Workflow Automation", "Resource Planning", "Quality Control"],
@@ -102,18 +102,25 @@ export default function Dashboard() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false); // New state for sidebar expansion
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-    })
+    const getSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error fetching session:", error?.message || error);
+      } else {
+        setSession(session);
+      }
+      setLoading(false);
+    };
+
+    getSession();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
+      setSession(session);
+    });
 
-    return () => subscription.unsubscribe()
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleDepartmentChange = (departmentId: string) => {
@@ -122,7 +129,7 @@ export default function Dashboard() {
       setActiveSection("dashboard")
     } else {
       setSelectedDepartment(departmentId)
-      setActiveSection("workspace") // Default section for departments
+      setActiveSection("dashboard") // Default section for departments
     }
   }
 
@@ -185,14 +192,7 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center space-x-4">
                 <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">Executive Access</Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-slate-600 text-slate-300 hover:bg-slate-700 bg-transparent"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </Button>
+                
               </div>
             </div>
           </div>

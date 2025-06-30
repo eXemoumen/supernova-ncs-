@@ -153,3 +153,54 @@ This document outlines the API endpoints required by the frontend's Executive Da
     "trend": "neutral"
   }
 ]
+```
+
+## 5. Database Integration (Supabase)
+
+The backend utilizes **Supabase** as its primary database solution. Supabase provides a PostgreSQL database, real-time capabilities, and authentication.
+
+**Key aspects of Supabase integration:**
+
+*   **Database Type**: PostgreSQL
+*   **Access Method**: The backend interacts with Supabase using its client libraries or direct API calls.
+*   **Environment Variables**:
+    *   `SUPABASE_URL`: The URL of your Supabase project.
+    *   `SUPABASE_ANON_KEY`: Your Supabase public anon key.
+    *   `SUPABASE_SERVICE_ROLE_KEY`: (For backend-only operations) Your Supabase service role key, which has elevated privileges.
+    *   `SUPABASE_JWKS_URI`: (For JWT verification) The JWKS URI for Supabase, used to verify JWTs issued by Supabase Auth.
+
+**Relevant Tables for Frontend Functionality:**
+
+*   **`users`**: (Managed by Supabase Auth) Stores user authentication data.
+*   **`clients`**: (New table for "Add Client" feature) This table will store information about clients, including:
+    *   `id` (UUID, Primary Key)
+    *   `name` (Text, required)
+    *   `niche` (Text, required)
+    *   `contact_person` (Text)
+    *   `contact_email` (Text)
+    *   `notes` (Text)
+    *   `created_at` (Timestamp with timezone, default now())
+
+**Backend API for Clients (Proposed):**
+
+*   **Endpoint:** `/api/clients`
+*   **Method:** `POST`
+*   **Description:** Adds a new client to the `clients` table.
+*   **Request Body (JSON):**
+    ```json
+    {
+      "name": "Client Name",
+      "niche": "Marketing",
+      "contact_person": "John Doe",
+      "contact_email": "john.doe@example.com",
+      "notes": "Important notes about the client."
+    }
+    ```
+*   **Expected Response Body (JSON):**
+    ```json
+    {
+      "message": "Client added successfully",
+      "client_id": "uuid-of-new-client"
+    }
+    ```
+    (Or the full client object if preferred)
