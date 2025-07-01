@@ -24,19 +24,19 @@ const Progress = React.forwardRef<
   }, [value, color]);
   
   return (
-    <ProgressPrimitive.Root
-      ref={ref}
-      className={cn(
-        "relative h-4 w-full overflow-hidden rounded-full bg-secondary",
-        className
-      )}
-      {...props}
-    >
-      <ProgressPrimitive.Indicator
-        className="h-full w-full flex-1 bg-primary transition-all"
+  <ProgressPrimitive.Root
+    ref={ref}
+    className={cn(
+      "relative h-4 w-full overflow-hidden rounded-full bg-secondary",
+      className
+    )}
+    {...props}
+  >
+    <ProgressPrimitive.Indicator
+      className="h-full w-full flex-1 bg-primary transition-all"
         style={indicatorStyle}
-      />
-    </ProgressPrimitive.Root>
+    />
+  </ProgressPrimitive.Root>
   );
 })
 Progress.displayName = ProgressPrimitive.Root.displayName

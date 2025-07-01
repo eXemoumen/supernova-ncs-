@@ -652,11 +652,11 @@ export default function Operations({ // Renamed from Marketing
       <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
         {/* Main Content and Chatbot Layout */}
         <div className="flex flex-1 w-full">
-          {/* Main Content Area */}
+        {/* Main Content Area */}
           <div className={`${isMobile ? 'w-full' : 'w-2/3'} p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto`}>
             {renderMainContent()}
-          </div>
-          
+                </div>
+
           {/* Integrated Chatbot (Desktop Only) */}
           {!isMobile && (
             <div className="w-1/3 border-l border-slate-700/50">
@@ -665,8 +665,8 @@ export default function Operations({ // Renamed from Marketing
                 specialization="operations management and process optimization"
                 displayMode="integrated"
               />
-            </div>
-          )}
+                  </div>
+                )}
         </div>
       </div>
 

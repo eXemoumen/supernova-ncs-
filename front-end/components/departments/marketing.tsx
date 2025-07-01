@@ -546,7 +546,7 @@ export default function Marketing({
                       borderColor: "#334155",
                       borderRadius: "0.375rem",
                       color: "#f8fafc",
-                    }}
+                        }}
                     formatter={(value: any) => [`$${value}`, ""]}
                       />
                       <Line
@@ -855,7 +855,7 @@ export default function Marketing({
           onClose={() => {}}
         />
                 </div>
-    );
+        );
   };
 
   return (
@@ -904,11 +904,11 @@ export default function Marketing({
       <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
         {/* Main Content and Chatbot Layout */}
         <div className="flex flex-1 w-full">
-          {/* Main Content Area */}
+        {/* Main Content Area */}
           <div className={`${isMobile ? 'w-full' : 'w-2/3'} p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto`}>
             {renderMainContent()}
           </div>
-          
+
           {/* Integrated Chatbot (Desktop Only) */}
           {!isMobile && (
             <div className="w-1/3 border-l border-slate-700/50">
@@ -917,10 +917,10 @@ export default function Marketing({
                 specialization="campaign management and content strategy"
                 displayMode="integrated"
               />
-            </div>
+                                </div>
           )}
-        </div>
-      </div>
+              </div>
+            </div>
 
       {/* Mobile Chatbot (Overlay Mode) */}
       {isMobile && (
@@ -929,7 +929,7 @@ export default function Marketing({
           specialization="campaign management and content strategy"
           displayMode="overlay"
         />
-      )}
+                )}
     </div>
   );
 }

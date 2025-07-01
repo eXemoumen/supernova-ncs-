@@ -125,6 +125,14 @@ export function GlobalSidebar({
       restricted: true,
     },
     {
+      id: "agi",
+      name: "AGI Assistant",
+      icon: Bot,
+      description: "AI command center",
+      count: null,
+      restricted: false,
+    },
+    {
       id: "content-studio",
       name: "Content Studio",
       icon: Sparkles,

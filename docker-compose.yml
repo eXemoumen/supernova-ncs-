@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./back-end
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./back-end:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      # Add any necessary environment variables for your backend here
+      # For example, Supabase connection details if not already in .env
+      - PORT=3001
+    restart: always
+
+  agi:
+    build:
+      context: ./agi-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    
+    environment:
+      - API_BASE_URL=http://backend:3001/api
+    depends_on:
+      - backend
+    restart: always
+
+  frontend:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    
+    depends_on:
+      - backend
+      - agi
+    environment:
+      # Add any necessary environment variables for your frontend here
+      # For example, Next.js public environment variables
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:3001
+      - NEXT_PUBLIC_AGI_URL=http://localhost:8000
+    restart: always

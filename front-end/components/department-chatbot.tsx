@@ -230,47 +230,47 @@ export function DepartmentChatbot({
 
   // Render the chat content (used by both overlay and integrated modes)
   const renderChatContent = () => {
-    return (
+  return (
       <>
-        {/* Messages */}
+          {/* Messages */}
         <div className={cn(
           "flex-1 overflow-y-auto space-y-3 sm:space-y-4",
           displayMode === 'overlay' ? "p-3 sm:p-4" : "p-4"
         )}>
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.type === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
+            {messages.map((message) => (
               <div
-                className={`flex items-start space-x-1.5 sm:space-x-2 max-w-[85%] ${
-                  message.type === "user"
-                    ? "flex-row-reverse space-x-reverse sm:space-x-reverse"
-                    : ""
+                key={message.id}
+                className={`flex ${
+                  message.type === "user" ? "justify-end" : "justify-start"
                 }`}
               >
                 <div
+                className={`flex items-start space-x-1.5 sm:space-x-2 max-w-[85%] ${
+                    message.type === "user"
+                    ? "flex-row-reverse space-x-reverse sm:space-x-reverse"
+                      : ""
+                  }`}
+                >
+                  <div
                   className={`p-1.5 sm:p-2 rounded-full ${
-                    message.type === "user"
-                      ? "bg-blue-600"
-                      : "bg-gradient-to-r from-purple-500 to-pink-500"
-                  }`}
-                >
-                  {message.type === "user" ? (
+                      message.type === "user"
+                        ? "bg-blue-600"
+                        : "bg-gradient-to-r from-purple-500 to-pink-500"
+                    }`}
+                  >
+                    {message.type === "user" ? (
                     <User className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                  ) : (
+                    ) : (
                     <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                  )}
-                </div>
-                <div
+                    )}
+                  </div>
+                  <div
                   className={`p-2 sm:p-3 rounded-lg text-xs sm:text-sm ${
-                    message.type === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gradient-to-r from-slate-100 to-slate-50 text-slate-900 border"
-                  }`}
-                >
+                      message.type === "user"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gradient-to-r from-slate-100 to-slate-50 text-slate-900 border"
+                    }`}
+                  >
                   <p className="leading-relaxed break-words">{message.content}</p>
                   
                   {message.attachments && message.attachments.length > 0 && (
@@ -284,42 +284,42 @@ export function DepartmentChatbot({
                     </div>
                   )}
                   
-                  <p
-                    className={`text-xs mt-1 ${
-                      message.type === "user"
-                        ? "text-blue-100"
-                        : "text-slate-500"
-                    }`}
-                  >
+                    <p
+                      className={`text-xs mt-1 ${
+                        message.type === "user"
+                          ? "text-blue-100"
+                          : "text-slate-500"
+                      }`}
+                    >
                     {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="flex items-start space-x-1.5 sm:space-x-2">
-                <div className="p-1.5 sm:p-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
-                  <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                </div>
-                <div className="p-2 sm:p-3 rounded-lg bg-slate-100 border">
-                  <div className="flex space-x-1">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    ></div>
-                    <div
-                      className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
+                    </p>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            ))}
+
+            {isTyping && (
+              <div className="flex justify-start">
+              <div className="flex items-start space-x-1.5 sm:space-x-2">
+                <div className="p-1.5 sm:p-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
+                  <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
+                  </div>
+                <div className="p-2 sm:p-3 rounded-lg bg-slate-100 border">
+                    <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                      <div
+                      className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                      className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -333,24 +333,24 @@ export function DepartmentChatbot({
             value={contextData}
             onChange={(e) => setContextData(e.target.value)}
           />
-        </div>
+          </div>
 
-        {/* Input */}
+          {/* Input */}
         <div className="border-t p-3 sm:p-4">
-          <div className="flex space-x-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={`Ask your ${department} AI assistant...`}
-              onKeyPress={(e) => e.key === "Enter" && handleSend()}
+            <div className="flex space-x-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={`Ask your ${department} AI assistant...`}
+                onKeyPress={(e) => e.key === "Enter" && handleSend()}
               className="flex-1 text-xs sm:text-sm"
-            />
-            <Button
-              onClick={handleSend}
+              />
+              <Button
+                onClick={handleSend}
               disabled={(!input.trim() && attachedFiles.length === 0) || isTyping}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
               size={displayMode === 'overlay' && isMobile ? "sm" : "default"}
-            >
+              >
               <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
@@ -402,12 +402,12 @@ export function DepartmentChatbot({
           </div>
           
           <div className="flex items-center justify-center mt-2 sm:mt-3">
-            <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs">
               <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-              Powered by Advanced AI
-            </Badge>
+                Powered by Advanced AI
+              </Badge>
+            </div>
           </div>
-        </div>
       </>
     );
   };
@@ -504,8 +504,8 @@ export function DepartmentChatbot({
 
               <CardContent className="flex-1 flex flex-col p-0">
                 {renderChatContent()}
-              </CardContent>
-            </Card>
+        </CardContent>
+      </Card>
           )}
         </motion.div>
       </>
@@ -552,7 +552,7 @@ export function DepartmentChatbot({
             ))}
           </SelectContent>
         </Select>
-      </div>
+    </div>
 
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
         {renderChatContent()}

@@ -774,7 +774,7 @@ export default function HR({
           <div className={`${isMobile ? 'w-full' : 'w-2/3'} p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto`}>
             {renderMainContent()}
           </div>
-          
+
           {/* Integrated Chatbot (Desktop Only) */}
           {!isMobile && (
             <div className="w-1/3 border-l border-slate-700/50">
@@ -783,10 +783,10 @@ export default function HR({
                 specialization="employee management and recruitment"
                 displayMode="integrated"
               />
-            </div>
+                                </div>
           )}
-        </div>
-      </div>
+              </div>
+            </div>
 
       {/* Mobile Chatbot (Overlay Mode) */}
       {isMobile && (

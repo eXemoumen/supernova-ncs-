@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,7 +78,7 @@ const EmailPage = ({ onBackAction, department }: EmailPageProps) => {
               />
             </div>
             
-            <div>
+        <div>
               <Label htmlFor="prompt" className="text-sm font-medium text-slate-300 mb-1.5 block">
                 Email Prompt
               </Label>
@@ -158,8 +159,8 @@ const EmailPage = ({ onBackAction, department }: EmailPageProps) => {
               <div className="flex items-center space-x-2">
                 <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500 via-indigo-500 to-blue-600 rounded-xl shadow-lg">
                   <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
-                </div>
-                <div>
+        </div>
+        <div>
                   <h1 className="text-sm sm:text-base md:text-xl font-semibold text-white truncate">
                     Email Automation
                   </h1>
@@ -168,7 +169,7 @@ const EmailPage = ({ onBackAction, department }: EmailPageProps) => {
                   </p>
                 </div>
               </div>
-            </div>
+        </div>
             <div className="flex items-center space-x-2 sm:space-x-3">
               <Button
                 variant="outline"
@@ -178,7 +179,7 @@ const EmailPage = ({ onBackAction, department }: EmailPageProps) => {
               >
                 <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0 sm:mr-2" />
                 <span className="hidden sm:inline">Back</span>
-              </Button>
+        </Button>
               <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 font-medium text-xs hidden sm:inline-flex">
                 <Zap className="h-3 w-3 mr-1" />
                 AI Enabled

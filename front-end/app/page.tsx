@@ -18,6 +18,7 @@ import Clients from "@/components/departments/clients"
 import Email from "@/components/departments/email"
 import { useIsMobile, useIsTablet, useTouchDevice } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 const departments = [
   {
@@ -98,7 +99,8 @@ const departmentComponents = {
   operations: Operations,
   clients: Clients,
   email: Email,
-  dashboard: ExecutiveDashboard // For consistency
+  dashboard: ExecutiveDashboard, // For consistency
+  // AGI doesn't have a component here because we navigate to a separate page
 }
 
 export default function Dashboard() {
@@ -109,6 +111,7 @@ export default function Dashboard() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true)
   const [expandedMarketing, setExpandedMarketing] = useState(false)
   
+  const router = useRouter()
   const isMobile = useIsMobile()
   const isTablet = useIsTablet()
   const isTouch = useTouchDevice()
@@ -124,16 +127,16 @@ export default function Dashboard() {
     
     const getSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error("Error fetching session:", error?.message || error);
-        } else {
-          setSession(session);
-        }
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error fetching session:", error?.message || error);
+      } else {
+        setSession(session);
+      }
       } catch (error) {
         console.error("Failed to fetch session:", error);
       } finally {
-        setLoading(false);
+      setLoading(false);
       }
     };
 
@@ -155,6 +158,10 @@ export default function Dashboard() {
     } else if (departmentId === "marketing") {
       setSelectedDepartment(departmentId)
       setActiveSection("marketing-dashboard") // Marketing uses specific section IDs
+    } else if (departmentId === "agi") {
+      // Navigate to the AGI page using window.location
+      window.location.href = "/agi"
+      return
     } else {
       setSelectedDepartment(departmentId)
       setActiveSection("dashboard") // Default section for departments
@@ -177,22 +184,27 @@ export default function Dashboard() {
   }
 
   const renderMainContent = () => {
-    if (selectedDepartment) {
-      const DepartmentComponent = departmentComponents[selectedDepartment as keyof typeof departmentComponents]
+  if (selectedDepartment) {
+    const DepartmentComponent = departmentComponents[selectedDepartment as keyof typeof departmentComponents]
+
+    if (DepartmentComponent) {
+      const handleBack = () => handleDepartmentChange("dashboard");
       
-      if (DepartmentComponent) {
-        return (
-          <DepartmentComponent
-            onBack={() => handleDepartmentChange("dashboard")}
-            department={departments.find((d) => d.id === selectedDepartment)}
-            activeSection={activeSection}
-            onSectionChange={setActiveSection}
-          />
-        )
-      }
+      // Handle all department components
+      return (
+        <DepartmentComponent
+          onBack={handleBack}
+          onBackAction={handleBack}
+          department={departments.find((d) => d.id === selectedDepartment)}
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+          onDepartmentChange={handleDepartmentChange}
+        />
+      )
     }
-    
-    return (
+  }
+
+  return (
       <>
         {/* Header */}
         <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 shadow-lg">

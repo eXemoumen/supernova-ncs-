@@ -1,16 +1,16 @@
 const db = require('../model/db');
 
-const getAllMarketingDataPoints = async (req, res) => {
+const getMarketingData = async (req, res) => {
     try {
-        const { data, error } = await db.from('marketing_data_points').select('*');
+        const { data, error } = await db.from('marketing_data').select('*');
         if (error) throw error;
         res.status(200).json(data);
     } catch (error) {
-        console.error("Error fetching marketing data points:", error.message);
+        console.error("Error fetching marketing data:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
 module.exports = {
-    getAllMarketingDataPoints,
+    getMarketingData,
 };

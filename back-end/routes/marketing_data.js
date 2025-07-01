@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const marketingDataController = require('../controllers/marketing_data');
+const { getMarketingData } = require('../controllers/marketing_data');
 
-router.get('/', marketingDataController.getAllMarketingDataPoints);
+router.get('/', getMarketingData);
 
 module.exports = router;
