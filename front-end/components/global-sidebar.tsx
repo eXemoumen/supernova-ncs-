@@ -38,9 +38,15 @@ import {
   ChevronDown,
   ChevronUp,
   User,
-  Mail
+  Mail,
+  Menu,
+  Home
 } from "lucide-react"
 import { supabase } from "../lib/supabaseClient"
+import { useIsMobile, useIsTablet, useTouchDevice, usePrefersReducedMotion } from "@/hooks/use-mobile"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
 interface GlobalSidebarProps {
   activeSection?: string
@@ -49,6 +55,8 @@ interface GlobalSidebarProps {
   currentDepartment?: string | null
   defaultExpanded?: boolean
   setIsExpanded: (expanded: boolean) => void;
+  expandedMarketing?: boolean;
+  setExpandedMarketing?: (expanded: boolean) => void;
 }
 
 export function GlobalSidebar({
@@ -56,16 +64,44 @@ export function GlobalSidebar({
   onSectionChange,
   onDepartmentChange,
   currentDepartment,
-  defaultExpanded = false,
+  defaultExpanded = true,
   setIsExpanded,
+  expandedMarketing = false,
+  setExpandedMarketing,
 }: GlobalSidebarProps) {
   
   const [isExpanded, setIsExpandedState] = useState(defaultExpanded);
-  const [expandedMarketing, setExpandedMarketing] = useState(false);
+  const [localExpandedMarketing, setLocalExpandedMarketing] = useState(currentDepartment === "marketing");
+  const isMobile = useIsMobile();
+  
+  // Use either the parent component's state or local state
+  const isMarketingExpanded = expandedMarketing !== undefined ? expandedMarketing : localExpandedMarketing;
+  const toggleMarketing = (expanded: boolean) => {
+    if (setExpandedMarketing) {
+      setExpandedMarketing(expanded);
+    } else {
+      setLocalExpandedMarketing(expanded);
+    }
+  };
+  const isTablet = useIsTablet();
+  const isTouch = useTouchDevice();
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     setIsExpandedState(defaultExpanded);
-  }, [defaultExpanded]);
+    setIsExpanded(defaultExpanded);
+  }, [defaultExpanded, setIsExpanded]);
+
+  // Update expandedMarketing when currentDepartment changes
+  useEffect(() => {
+    if (currentDepartment === "marketing") {
+      toggleMarketing(true);
+    } else if (setExpandedMarketing) {
+      setExpandedMarketing(false);
+    } else {
+      setLocalExpandedMarketing(false);
+    }
+  }, [currentDepartment]);
   
   const { theme, setTheme } = useTheme();
 
@@ -73,11 +109,17 @@ export function GlobalSidebar({
     await supabase.auth.signOut()
   }
 
+  const toggleSidebar = () => {
+    const newState = !isExpanded;
+    setIsExpandedState(newState);
+    setIsExpanded(newState);
+  };
+
   const departments = [
     {
       id: "dashboard",
       name: "Executive Dashboard",
-      icon: Crown,
+      icon: Home,
       description: "Strategic overview",
       count: null,
       restricted: true,
@@ -97,6 +139,7 @@ export function GlobalSidebar({
       description: "Campaign management",
       count: 8,
       restricted: false,
+      hasChildren: true,
     },
     {
       id: "support",
@@ -129,7 +172,8 @@ export function GlobalSidebar({
       description: "Project management",
       count: 7,
       restricted: false,
-    }, {
+    }, 
+    {
       id: "clients",
       name: "Clients",
       icon: User,
@@ -233,7 +277,7 @@ export function GlobalSidebar({
       name: "Content Creation",
       icon: PenTool,
       description: "Generate content ideas and copy",
-      count: 156,
+      count: 15,
     },
     {
       id: "campaign-configuration",
@@ -244,221 +288,326 @@ export function GlobalSidebar({
     },
   ]
 
-const handleItemClick = (id: string, type: "department" | "section") => {
+  const handleItemClick = (id: string, type: "department" | "section") => {
     if (type === "department") {
       if (id === "marketing") {
         if (currentDepartment === "marketing") {
-          setExpandedMarketing(!expandedMarketing);
+          toggleMarketing(!isMarketingExpanded);
         } else {
           onDepartmentChange?.(id);
-          setExpandedMarketing(true);
+          toggleMarketing(true);
         }
       } else {
         onDepartmentChange?.(id);
-        setExpandedMarketing(false);
+        toggleMarketing(false);
       }
-    } else {
+      
+      if (isMobile && id !== "marketing") {
+        const sheetElement = document.querySelector('[data-state="open"]');
+        if (sheetElement) {
+          const closeButton = sheetElement.querySelector('button[data-state="open"]');
+          closeButton?.click();
+        }
+      }
+    } else if (type === "section") {
       onSectionChange?.(id);
+      // Don't close mobile menu when selecting a section
     }
   }
+  
+  const handleMarketingSectionClick = (sectionId: string) => {
+    // First navigate to marketing if not already there
+    if (currentDepartment !== "marketing") {
+      onDepartmentChange?.("marketing");
+    }
+    
+    // Then change the section
+    onSectionChange?.(sectionId);
+    
+    // On mobile, close the sidebar sheet after selection
+    if (isMobile) {
+      const sheetElement = document.querySelector('[data-state="open"]');
+      if (sheetElement) {
+        const closeButton = sheetElement.querySelector('button[data-state="open"]');
+        closeButton?.click();
+      }
+    }
+  };
 
-  const renderNavigationItems = () => {
+  const renderSidebarItem = (dept: any) => {
+    const isActive = currentDepartment === dept.id;
+    const showExpander = dept.id === "marketing" && isExpanded;
+    const isItemExpanded = dept.id === "marketing" && isMarketingExpanded;
+    
     return (
-      <div className="space-y-1 px-3">
-        {departments.map((item) => {
-          const Icon = item.icon;
-          const isActive = currentDepartment === item.id || 
-                         (item.id === "dashboard" && !currentDepartment);
-          const isMarketing = item.id === "marketing";
-          
-          return (
-            <div key={item.id} className="space-y-1">
-              <Button
-                variant={isActive && !(isMarketing && expandedMarketing) ? "secondary" : "ghost"}
-                size="sm"
-                className={`w-full justify-start h-auto p-3 ${
-                  isActive && !(isMarketing && expandedMarketing)
-                    ? "bg-slate-700 text-white border-slate-600"
-                    : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-                } ${!isExpanded ? "px-3" : ""}`}
-                onClick={() => handleItemClick(item.id, "department")}
-              >
-                <div className="relative">
-                  <Icon
-                    className={`h-5 w-5 ${!isExpanded ? "" : "mr-3"} flex-shrink-0 ${item.restricted ? "text-amber-400" : ""}`}
-                  />
-                  {item.count !== null && item.count > 0 && !isExpanded && (
-                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                      {item.count > 99 ? "99" : item.count}
-                    </div>
-                  )}
+      <div key={dept.id} className="space-y-1">
+        <Button
+          variant={isActive ? "secondary" : "ghost"}
+          className={cn(
+            "w-full",
+            isExpanded ? "justify-between px-3" : "justify-center px-0",
+            "h-auto py-3 relative group",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          )}
+          onClick={() => handleItemClick(dept.id, "department")}
+        >
+          <div className="flex items-center">
+            <dept.icon className={cn(
+              "h-5 w-5 flex-shrink-0",
+              isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground",
+              !isExpanded && "mx-auto"
+            )} />
+            
+            {isExpanded && (
+              <div className="ml-3 text-left">
+                <div className={cn("font-medium text-sm", isActive ? "text-primary" : "")}>
+                  {dept.name}
                 </div>
-                {isExpanded && (
-                  <>
-                    <div className="flex-1 text-left">
-                      <div className="font-medium flex items-center">
-                        {item.name}
-                        {item.restricted && <Crown className="h-3 w-3 ml-2 text-amber-400" />}
-                      </div>
-                      <div className="text-xs opacity-70">{item.description}</div>
-                    </div>
-                    {isMarketing && (
-                      <div className="ml-2">
-                        {expandedMarketing ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                      </div>
-                    )}
-                    {item.count !== null && item.count > 0 && !isMarketing && (
-                      <Badge variant="outline" className="ml-auto text-xs border-slate-600 text-slate-300">
-                        {item.count}
-                      </Badge>
-                    )}
-                  </>
+                {dept.description && (
+                  <p className="text-xs text-muted-foreground truncate">{dept.description}</p>
+                )}
+              </div>
+            )}
+          </div>
+          
+          {!isExpanded && (
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <span className="sr-only">{dept.name}</span>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                  {dept.name}
+                  {dept.description && <p className="text-xs opacity-70">{dept.description}</p>}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          
+          {isExpanded && dept.count !== null && (
+            <Badge variant="secondary" className="ml-auto mr-2">
+              {dept.count}
+            </Badge>
+          )}
+          
+          {showExpander && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-5 w-5 p-0 ml-auto"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleMarketing(!isMarketingExpanded);
+              }}
+            >
+              {isItemExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+        </Button>
+        
+        {/* Marketing Subsections */}
+        {dept.id === "marketing" && isExpanded && isMarketingExpanded && (
+          <div className={cn(
+            "pl-8 space-y-1 overflow-hidden transition-all",
+            isItemExpanded ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+            prefersReducedMotion && "transition-none"
+          )}>
+            {marketingSections.map((section) => (
+              <Button
+                key={section.id}
+                variant={activeSection === section.id ? "secondary" : "ghost"}
+                size="sm"
+                className={cn(
+                  "w-full justify-start h-auto py-2 text-sm",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                )}
+                onClick={() => handleMarketingSectionClick(section.id)}
+              >
+                <section.icon className="h-4 w-4 mr-2" />
+                <span className="truncate">{section.name}</span>
+                {section.count !== null && (
+                  <Badge variant="outline" className="ml-auto">
+                    {section.count}
+                  </Badge>
                 )}
               </Button>
-
-              {/* Marketing sub-sections */}
-              {isMarketing && expandedMarketing && currentDepartment === "marketing" && isExpanded && (
-                <div className="ml-4 pl-2 border-l border-slate-700 space-y-1">
-                  {marketingSections.map((section) => {
-                    const SectionIcon = section.icon;
-                    const isSectionActive = activeSection === section.id;
-                    
-                    return (
-                      <Button
-                        key={section.id}
-                        variant={isSectionActive ? "secondary" : "ghost"}
-                        size="sm"
-                        className={`w-full justify-start h-auto p-2 ${
-                          isSectionActive
-                            ? "bg-slate-700 text-white border-slate-600"
-                            : "text-slate-300 hover:text-white hover:bg-slate-700/50"
-                        }`}
-                        onClick={() => handleItemClick(section.id, "section")}
-                      >
-                        <SectionIcon className="h-4 w-4 mr-3 flex-shrink-0" />
-                        <div className="flex-1 text-left">
-                          <div className="font-medium">{section.name}</div>
-                          <div className="text-xs opacity-70">{section.description}</div>
-                        </div>
-                        {section.count !== null && section.count > 0 && (
-                          <Badge variant="outline" className="ml-auto text-xs border-slate-600 text-slate-300">
-                            {section.count}
-                          </Badge>
-                        )}
-                      </Button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
+            ))}
+          </div>
+        )}
       </div>
     );
   };
 
-  return (
-    <div
-      className={`${
-        isExpanded ? "w-80" : "w-16"
-      } bg-slate-900/95 backdrop-blur-md border-r border-slate-700/50 shadow-2xl transition-all duration-300 ease-in-out flex flex-col relative z-40`}
+  const SidebarContent = () => (
+    <div className={cn(
+      "flex flex-col h-full",
+      isExpanded ? "w-64" : "w-[70px]",
+      "transition-all duration-300",
+      prefersReducedMotion && "transition-none"
+    )}>
+      <div className="flex items-center justify-between p-4 h-16 border-b">
+        {isExpanded ? (
+          <h2 className="text-lg font-semibold tracking-tight truncate">NCS-HACK</h2>
+        ) : (
+          <span className="text-lg font-bold mx-auto">NH</span>
+        )}
+        {!isMobile && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className={cn(
+              "transition-transform ml-auto flex-shrink-0",
+              "hover:bg-secondary",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            )}
+            aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {isExpanded ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+        )}
+      </div>
 
-    >
-      {/* Header */}
-      <div className="p-4 border-b border-slate-700/50">
-        <div className="flex items-center justify-between">
-          {isExpanded ? (
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-lg">
-                <Brain className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-white">OmniDesk</h2>
-                <p className="text-sm text-slate-400">Executive Platform</p>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center w-full">
-              <div className="p-2 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-lg">
-                <Brain className="h-5 w-5 text-white" />
-              </div>
-            </div>
-          )}
+      <ScrollArea className="flex-1 px-2">
+        <div className="space-y-1 py-2">
+          {departments.map(renderSidebarItem)}
+        </div>
+      </ScrollArea>
+
+      <div className="mt-auto border-t">
+        <div className={cn(
+          "p-4 flex items-center",
+          isExpanded ? "justify-between" : "justify-center"
+        )}>
+          <div className={cn(
+            "flex items-center",
+            !isExpanded && "flex-col gap-3"
+          )}>
+            <Switch
+              id="theme-toggle"
+              checked={theme === "dark"}
+              onCheckedChange={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className={cn(!isExpanded && "mx-auto")}
+              aria-label="Toggle dark mode"
+            />
+            {isExpanded && (
+              <Label htmlFor="theme-toggle" className="ml-3">
+                {theme === "dark" ? "Dark" : "Light"} Mode
+              </Label>
+            )}
+          </div>
 
           <Button
             variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!defaultExpanded)}
-            className="text-slate-400 hover:text-white ml-auto"
+            size={isExpanded ? "default" : "icon"}
+            onClick={handleLogout}
+            className={cn(
+              isExpanded ? "" : "mt-3 mx-auto",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            )}
+            aria-label="Logout"
           >
-            {isExpanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            <LogOut className={cn("h-5 w-5", !isExpanded && "mx-auto")} />
+            {isExpanded && <span className="ml-2">Logout</span>}
           </Button>
         </div>
       </div>
+    </div>
+  );
 
-      {/* Quick Actions */}
-      {isExpanded && (
-        <div className="p-4 border-b border-slate-700/50">
-          <h3 className="text-sm font-medium text-slate-300 mb-3">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {quickActions.map((action) => {
-              const Icon = action.icon
-              return (
+  // Mobile sidebar and bottom navigation
+  if (isMobile) {
+    return (
+      <>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon" 
+              className="fixed top-4 left-4 z-50 bg-background/80 backdrop-blur-sm border-slate-700/50 shadow-md"
+            >
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Open navigation</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-[85%] max-w-[300px] border-slate-700/50 overflow-y-auto">
+            <div className="h-full flex flex-col">
+              <SidebarContent />
+            </div>
+          </SheetContent>
+        </Sheet>
+        
+        {/* Bottom Mobile Navigation */}
+        <nav className="safe-bottom fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-slate-700/50 h-16 flex items-center justify-around px-4 z-40 shadow-md">
+          {departments.slice(0, 5).map((dept) => (
+            <Button
+              key={dept.id}
+              variant={currentDepartment === dept.id ? "secondary" : "ghost"}
+              size="icon"
+              className={cn(
+                "h-12 w-12 rounded-full relative",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              )}
+              onClick={() => handleItemClick(dept.id, "department")}
+            >
+              <dept.icon className="h-5 w-5" />
+              <span className="sr-only">{dept.name}</span>
+              
+              {/* Show active indicator dot */}
+              {currentDepartment === dept.id && (
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-primary" />
+              )}
+              
+              {/* Show expandable indicator for marketing */}
+              {dept.id === "marketing" && isMarketingExpanded && (
+                <span className="absolute -bottom-1 -right-1 h-2.5 w-2.5 rounded-full bg-primary-foreground border-2 border-primary" />
+              )}
+            </Button>
+          ))}
+        </nav>
+        
+        {/* Marketing subsections sliding panel when marketing is expanded on mobile */}
+        {currentDepartment === "marketing" && isMarketingExpanded && (
+          <div className="safe-bottom fixed bottom-16 left-0 right-0 bg-popover/90 backdrop-blur-sm border-t border-slate-700/50 z-30 p-2 shadow-lg">
+            <div className="flex overflow-x-auto gap-2 pb-1 scrollbar-thin px-1 py-1">
+              {marketingSections.map((section) => (
                 <Button
-                  key={action.id}
-                  variant="outline"
+                  key={section.id}
+                  variant={activeSection === section.id ? "secondary" : "outline"}
                   size="sm"
-                  className="flex flex-col items-center p-3 h-auto border-slate-700 hover:border-slate-600 hover:bg-slate-800 bg-transparent text-slate-300"
+                  className="whitespace-nowrap flex-shrink-0 h-auto py-2"
+                  onClick={() => handleMarketingSectionClick(section.id)}
                 >
-                  <div className={`p-2 rounded-lg ${action.color} mb-2`}>
-                    <Icon className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="text-xs font-medium">{action.label}</span>
+                  <section.icon className="h-4 w-4 mr-2" />
+                  {section.name}
                 </Button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Navigation */}
-      <ScrollArea className="flex-1 py-4">{renderNavigationItems()}</ScrollArea>
-
-      {/* User Profile */}
-      <div className="mt-auto p-4 space-y-4">
-        <Separator className="bg-slate-700/50" />
-
-        {isExpanded && (
-          <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-semibold">
-                    JD
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-semibold text-white">John Doe</p>
-                  <p className="text-xs text-slate-400">Administrator</p>
-                </div>
-              </div>
-              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white" onClick={handleLogout}>
-                <LogOut className="h-5 w-5" />
-              </Button>
+              ))}
             </div>
           </div>
         )}
+      </>
+    );
+  }
 
-        {!isExpanded && (
-           <Button variant="ghost" size="icon" className="w-full text-slate-400 hover:text-white" onClick={handleLogout}>
-            <LogOut className="h-5 w-5" />
-          </Button>
-        )}
-      </div>
-    </div>
-  )
+  return (
+    <aside 
+      className={cn(
+        "h-screen sticky top-0 border-r bg-background/80 backdrop-blur-sm shadow-md z-30",
+        "transition-all duration-300",
+        prefersReducedMotion && "transition-none",
+        isExpanded ? "w-64" : "w-[70px]"
+      )}
+      aria-label="Sidebar navigation"
+    >
+      <SidebarContent />
+    </aside>
+  );
 }

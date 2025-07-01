@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { BarChart3, Users, DollarSign, MessageSquare, Sparkles, Brain } from "lucide-react"
+import { BarChart3, Users, DollarSign, MessageSquare, Sparkles, Brain, Home } from "lucide-react"
 import { GlobalSidebar } from "@/components/global-sidebar"
 import { ExecutiveDashboard } from "@/components/executive-dashboard"
 import ContentStudio from "@/components/departments/content-studio"
@@ -12,10 +12,12 @@ import Support from "@/components/departments/support"
 import HR from "@/components/departments/hr"
 import Finance from "@/components/departments/finance"
 import Operations from "@/components/departments/operations"
-import AuthForm from "@/components/auth-form" // Import the AuthForm component
-import { supabase } from "../lib/supabaseClient" // Import supabase client
+import AuthForm from "@/components/auth-form"
+import { supabase } from "../lib/supabaseClient"
 import Clients from "@/components/departments/clients"
 import Email from "@/components/departments/email"
+import { useIsMobile, useIsTablet, useTouchDevice } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 
 const departments = [
   {
@@ -86,7 +88,7 @@ const departments = [
   },
 ]
 
-// Component mapping
+// Component mapping - each department gets its own component
 const departmentComponents = {
   "content-studio": ContentStudio,
   marketing: Marketing,
@@ -94,8 +96,9 @@ const departmentComponents = {
   hr: HR,
   finance: Finance,
   operations: Operations,
-  clients:Clients,
-  email:Email
+  clients: Clients,
+  email: Email,
+  dashboard: ExecutiveDashboard // For consistency
 }
 
 export default function Dashboard() {
@@ -103,17 +106,35 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState("dashboard")
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false); // New state for sidebar expansion
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true)
+  const [expandedMarketing, setExpandedMarketing] = useState(false)
+  
+  const isMobile = useIsMobile()
+  const isTablet = useIsTablet()
+  const isTouch = useTouchDevice()
+
+  // Update expanded marketing state when department changes
+  useEffect(() => {
+    setExpandedMarketing(selectedDepartment === "marketing");
+  }, [selectedDepartment]);
 
   useEffect(() => {
+    // Set expanded state based on screen size
+    setIsSidebarExpanded(!isMobile);
+    
     const getSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Error fetching session:", error?.message || error);
-      } else {
-        setSession(session);
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Error fetching session:", error?.message || error);
+        } else {
+          setSession(session);
+        }
+      } catch (error) {
+        console.error("Failed to fetch session:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getSession();
@@ -125,12 +146,15 @@ export default function Dashboard() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [isMobile]);
 
   const handleDepartmentChange = (departmentId: string) => {
     if (departmentId === "dashboard") {
       setSelectedDepartment(null)
       setActiveSection("dashboard")
+    } else if (departmentId === "marketing") {
+      setSelectedDepartment(departmentId)
+      setActiveSection("marketing-dashboard") // Marketing uses specific section IDs
     } else {
       setSelectedDepartment(departmentId)
       setActiveSection("dashboard") // Default section for departments
@@ -138,75 +162,104 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-gray-100">Loading...</div>
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-900">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="loading-spinner h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+          <p className="text-slate-300">Loading NCS-HACK platform...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!session) {
     return <AuthForm />
   }
 
-  if (selectedDepartment) {
-    const DepartmentComponent = departmentComponents[selectedDepartment as keyof typeof departmentComponents]
-
-    if (DepartmentComponent) {
-      return (
-        <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-          <GlobalSidebar
+  const renderMainContent = () => {
+    if (selectedDepartment) {
+      const DepartmentComponent = departmentComponents[selectedDepartment as keyof typeof departmentComponents]
+      
+      if (DepartmentComponent) {
+        return (
+          <DepartmentComponent
+            onBack={() => handleDepartmentChange("dashboard")}
+            department={departments.find((d) => d.id === selectedDepartment)}
             activeSection={activeSection}
             onSectionChange={setActiveSection}
-            onDepartmentChange={handleDepartmentChange}
-            currentDepartment={selectedDepartment}
-            defaultExpanded={isSidebarExpanded}
-            setIsExpanded={setIsSidebarExpanded}
           />
-          <div className="flex-1">
-            <DepartmentComponent
-              onBack={() => handleDepartmentChange("dashboard")}
-              department={departments.find((d) => d.id === selectedDepartment)}
-              activeSection={activeSection}
-              onSectionChange={setActiveSection}
-            />
-          </div>
-        </div>
-      )
+        )
+      }
     }
-  }
-
-  return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <GlobalSidebar
-            activeSection={activeSection}
-            onSectionChange={setActiveSection}
-            onDepartmentChange={handleDepartmentChange}
-            currentDepartment={selectedDepartment}
-            defaultExpanded={isSidebarExpanded}
-            setIsExpanded={setIsSidebarExpanded}
-          />
-
-      <div className="flex-1 flex flex-col">
+    
+    return (
+      <>
         {/* Header */}
         <header className="bg-slate-900/80 backdrop-blur-sm border-b border-slate-700/50 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-3">
                 <div>
-                  <h1 className="text-xl font-bold text-white">OmniDesk Executive Platform</h1>
-                  <p className="text-sm text-slate-400">Strategic Business Intelligence</p>
+                  <h1 className="text-lg md:text-xl font-bold text-white">
+                    {selectedDepartment ? departments.find(d => d.id === selectedDepartment)?.name : "Executive Platform"}
+                  </h1>
+                  <p className="text-xs md:text-sm text-slate-400 truncate">
+                    {selectedDepartment 
+                      ? departments.find(d => d.id === selectedDepartment)?.description
+                      : "Strategic Business Intelligence"
+                    }
+                  </p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">Executive Access</Badge>
-                
+                <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hidden md:inline-flex">
+                  Executive Access
+                </Badge>
+                {isMobile && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-slate-300 hover:text-white hover:bg-slate-800/60"
+                    onClick={() => handleDepartmentChange("dashboard")}
+                  >
+                    <Home className="h-4 w-4 mr-1" /> Home
+                  </Button>
+                )}
               </div>
             </div>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex-1 overflow-y-auto pb-safe">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
             <ExecutiveDashboard onDepartmentChange={handleDepartmentChange} />
           </div>
         </div>
+      </>
+    )
+  }
+
+  return (
+    <div className="flex h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden">
+      {/* Sidebar */}
+      <GlobalSidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        onDepartmentChange={handleDepartmentChange}
+        currentDepartment={selectedDepartment}
+        defaultExpanded={isSidebarExpanded}
+        setIsExpanded={setIsSidebarExpanded}
+        expandedMarketing={expandedMarketing}
+        setExpandedMarketing={setExpandedMarketing}
+      />
+
+      {/* Main Content */}
+      <div className={cn(
+        "flex-1 flex flex-col overflow-hidden",
+        isMobile && "pt-16",
+        isMobile && selectedDepartment === "marketing" && expandedMarketing ? "pb-32 safe-bottom" : (isMobile ? "pb-20 safe-bottom" : "")
+      )}>
+        {renderMainContent()}
       </div>
     </div>
   )

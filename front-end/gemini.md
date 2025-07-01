@@ -1,34 +1,21 @@
-@@rules must follow => 
--you have the right only to modify the font end folder dont node touche the backend fodler 
--ALWAYS  read the code base of the back end folder to get context before modify anything in the front end 
-- make sure the front end will alwsay be matchable with the back end @@
- 
-
-
-
-
-
 **AI Manager Platform – Front-End Design Doc**
-@rule=> you are allwod only the modify in front end folder DO NOT TOUCHE OR CODE ANYTHING IN BACK END FOLDER 
 
-@rule => always take look on the back end fodler code base and take to context before you start modifying anthing in the code base of the front 
-**1. Objectif & Contexte**
+**1. Objective & Context**
 
-* Fournir une interface Next.js 15 intuitive pour piloter les modules IA (Marketing, Support, RH, Finance, Opérations).
-* Garantir une expérience fluide, réactive, sécurisée et adaptée à une PME ou startup.
+*   Provide an intuitive Next.js 15 interface to manage AI modules (Marketing, Support, HR, Finance, Operations).
+*   Ensure a fluid, responsive, secure experience suitable for an SME or startup.
 
 **2. Architecture & Stack**
 
-* **Framework** : Next.js 15 (React, SSR/ISR, routing file-based)
-* **UI** : TailwindCSS + Shadcn/UI + Lucide-react
-* **State Management** : React Query (fetching data) + Zustand pour le state local
-* **Data Fetching** :
-
-  * `useSWR` ou React Query sur `/api/*`
-  * Supabase JS client pour Realtime subscriptions sur la table `runs`
-* **Auth** : Supabase Auth (JWT) + middleware Next.js
-* **Animations** : Framer Motion (transitions pages, chargement)
-* **Forms & Validation** : React Hook Form + Zod
+*   **Framework**: Next.js 15 (React, SSR/ISR, file-based routing)
+*   **UI**: TailwindCSS + Shadcn/UI + Lucide-react
+*   **State Management**: React Query (for data fetching) + Zustand (for local state)
+*   **Data Fetching**:
+    *   `useSWR` or React Query on `/api/*`
+    *   Supabase JS client for Realtime subscriptions on the `runs` table
+*   **Auth**: Supabase Auth (JWT) + Next.js middleware
+*   **Animations**: Framer Motion (page transitions, loading)
+*   **Forms & Validation**: React Hook Form + Zod
 
 **3. Project Structure**
 
@@ -38,85 +25,80 @@ frontend/
 │   ├── layout.tsx            # global layout (nav, footer)
 │   ├── page.tsx              # landing / login redirect
 │   ├── middleware.ts         # auth enforcement
-│   ├── dashboard/            # /dashboard, liste des départements
+│   ├── dashboard/            # /dashboard, list of departments
 │   └── departments/
 │       └── [name]/
-│           ├── page.tsx      # page paramétrage module
-│           └── validation/   # boucle Reflect-AI
+│           ├── page.tsx      # module configuration page
+│           └── validation/   # Reflect-AI loop
 ├── components/               # UI atoms & modules
 │   ├── ui/                   # shadcn/ui overrides
-│   ├── AgentForm.tsx         # formulaire param IA
-│   ├── ChatBox.tsx           # boucle Reflect-AI
-│   └── ModuleCard.tsx        # carte de module
+│   ├── AgentForm.tsx         # AI param form
+│   ├── ChatBox.tsx           # Reflect-AI loop
+│   └── ModuleCard.tsx        # module card
 ├── lib/
-│   ├── supabaseClient.ts     # initialisation Supabase JS
-│   └── api.ts                # wrappers fetch vers Express
+│   ├── supabaseClient.ts     # Supabase JS initialization
+│   └── api.ts                # fetch wrappers for Express
 ├── hooks/
-│   └── useRuns.ts            # abstraction real-time runs
+│   └── useRuns.ts            # real-time runs abstraction
 ├── styles/
 │   └── globals.css           # Tailwind import
 └── utils/
-    └── animations.ts         # animations Framer Motion
+    └── animations.ts         # Framer Motion animations
 ```
 
+**4. Key Points & Best Practices**
 
-**5. Points Clés & Best Practices**
+*   Strict TypeScript in all modules.
+*   Atomic CSS via Tailwind, reusable components.
+*   SSR/ISR for the dashboard (performance & SEO not critical).
+*   Supabase Realtime for official updates.
 
-* TypeScript strict in all modules.
-* Atomic CSS via Tailwind, composants réutilisables.
-* SSR/ISR pour dashboard (performance & SEO non critique).
-* Supabase Realtime pour updates officielles.
- 
+**5. Detailed Branches**
 
+*   **Admin**
+    *   Dashboard → Department selection
+    *   Module configuration (budget, audience, assignment)
+    *   Launch AI run → create Supabase record
+    *   Supervision via real-time subscription
+    *   Export & Reporting (PDF or automated)
+*   **Operator**
+    *   Login & Desk access (assigned modules)
+    *   Module details → briefing and configuration
+    *   Reflect-AI loop: AI consultation, feedback, iteration
+    *   Final validation (acceptance/rejection)
+    *   Export result (PDF or link sharing)
 
-**Branches détaillées :**
+**6. Features to Develop**
 
-* **Admin**
-  • Dashboard → Sélection du département
-  • Configuration du module (budget, audience, assignation)
-  • Lancement du run IA → création du record Supabase
-  • Supervision via real-time subscription
-  • Export & Reporting (PDF ou automatisé)
+| Feature                               | Endpoint / Component   | Main Role |
+| ------------------------------------- | ---------------------- | --------- |
+| **Auth & Permissions**                | `/api/auth/*`          | Dev 1     |
+| **List Departments & Modules**        | `/api/departments`     | Dev 1     |
+| **Launch an AI run**                  | `/api/agent/run`       | Dev 2     |
+| **Feedback & Iteration**              | `/api/agent/feedback`  | Dev 3     |
+| **Realtime Updates (Supabase Subs)**  | `useRuns` hook         | Dev 3     |
+| **Export PDF**                        | `/api/export/pdf`      | Dev 4     |
+| **Dashboard & UI Modules**            | `dashboard/page.tsx`   | Dev 2     |
+| **Module Configuration Form**         | `AgentForm.tsx`        | Dev 2     |
+| **ChatBox Reflect-AI**                | `ChatBox.tsx`          | Dev 3     |
+| **Error Handling & Logs**             | Middleware + UI Alerts | Dev 1 & 4 |
 
-* **Opérateur**
-  • Login & accès Desk (modules assignés)
-  • Détails module → briefing et paramétrage
-  • Boucle Reflect-AI : consultation IA, feedback, itération
-  • Validation finale (acceptation/rejet)
-  • Export du résultat (PDF ou partage de lien)
+**7. AI Coding Rules & Best Practices**
 
-**7. Fonctionnalités à développer**
+To ensure concise, maintainable, and "senior-level" quality code, the AI must follow these rules during generation or refactoring:
 
-| Fonctionnalité                                | Endpoint / Compo       | Rôle principal |
-| --------------------------------------------- | ---------------------- | -------------- |
-| **Auth & Permissions**                        | `/api/auth/*`          | Dev 1          |
-| **Liste Départements & Modules**              | `/api/departments`     | Dev 1          |
-| **Lancement d’un run IA**                     | `/api/agent/run`       | Dev 2          |
-| **Feedback & Iteration**                      | `/api/agent/feedback`  | Dev 3          |
-| **Realtime Updates (Supabase Subscriptions)** | `useRuns` hook         | Dev 3          |
-| **Export PDF**                                | `/api/export/pdf`      | Dev 4          |
-| **Dashboard & UI Modules**                    | `dashboard/page.tsx`   | Dev 2          |
-| **Formulaire de paramétrage module**          | `AgentForm.tsx`        | Dev 2          |
-| **ChatBox Reflect-AI**                        | `ChatBox.tsx`          | Dev 3          |
-| **Gestion des erreurs & logs**                | Middleware + UI Alerts | Dev 1 & Dev 4  |
+1.  **Explicit and consistent naming**: Use camelCase for variables/functions, PascalCase for React components, and meaningful names (e.g., `fetchAgentRuns`, `AgentForm`).
+2.  **Atomic functions and components**: Each function/component must have a single responsibility and not exceed 50 lines.
+3.  **Strict typing (TypeScript)**: Systematically define input/output types, avoid `any`, and prefer reusable interfaces and types.
+4.  **Modularity & Reusability**: Extract reusable logic into `hooks/`, `lib/`, or `utils/`, and avoid duplicated code.
+5.  **Unit & integration tests**: Provide a minimum coverage of 80% for each AI module, using Jest + React Testing Library + supertest.
+6.  **Validation & schemas**: Validate input data with Zod (frontend) and Zod middleware (backend).
+7.  **Useful documentation & comments**: Always comment the signature of complex functions, and write JSDoc for the export of critical modules.
+8.  **Linting & formatting**: Respect ESLint + Prettier (shared configuration), and fix warnings before merging.
+9.  **Performance & lazy loading**: Use `dynamic()` for heavy components, and optimize imports and the bundle.
+10. **Structured logs & traceability**: Use `console.debug/info/warn/error` consistently, and format logs in JSON if possible to facilitate debugging.
 
-**8. AI Coding Rules & Best Practices**
-
-Pour garantir un code concis, maintenable et de qualité « niveau senior », l’IA doit suivre ces règles lors de la génération ou de la refactorisation :
-
-1. **Nommage explicite et cohérent** : utiliser le camelCase pour les variables/fonctions, PascalCase pour les composants React, et des noms significatifs (ex : `fetchAgentRuns`, `AgentForm`).
-2. **Fonctions et composants atomiques** : chaque fonction/composant doit avoir une responsabilité unique et ne pas dépasser 50 lignes.
-3. **Typage strict (TypeScript)** : définir systématiquement les types d’entrée/sortie, éviter `any`, privilégier les interfaces et types réutilisables.
-4. **Modularité & Réutilisation** : extraire la logique réutilisable dans `hooks/`, `lib/` ou `utils/`, éviter le code dupliqué.
-5. **Tests unitaires & d’intégration** : fournir une couverture minimale de 80 % pour chaque module IA, utiliser Jest + React Testing Library + supertest.
-6. **Validation & schémas** : valider les données d’entrée avec Zod (frontend) et middleware Zod (backend).
-7. **Documentation & commentaires utiles** : commenter toujours la signature des fonctions complexes, rédiger des JSDoc pour l’export de modules critiques.
-8. **Linting & formatting** : respecter ESLint + Prettier (configuration partagée), fixer les warnings avant merge.
-9. **Performance & chargement différé** : utiliser `dynamic()` pour les composants lourds, optimiser les imports et le bundle.
-10. **Logs structurés & traçabilité** : utiliser `console.debug/info/warn/error` de façon cohérente, formater les logs en JSON si possible pour faciliter le debugging.
-
-///////
-
+---
 # Project Plan: NCS-HACK Front-End Development
 
 ## 1. Project Goal
@@ -175,11 +157,12 @@ The development process will be broken down into the following tasks:
 *   **5.1. Responsive Design:** Ensure the application is fully responsive on all devices.
 *   **5.2. Testing:** Write unit and integration tests to ensure code quality.
 *   **5.3. Deployment:** Deploy the application to a production environment.
-/// important rule 
 
-to do list -
-1- adding functinality to the dashbord  
-2 fixing the depatemnt that we will have 
-3 - statr conding the ui of each depatemnt 
-4- start downing the functiionality for eachdepatemnt 
-5-add loging auth with intergration of supa base
+---
+## To-Do List:
+
+1.  Add functionality to the dashboard.
+2.  Fix the departments that we will have.
+3.  Start coding the UI of each department.
+4.  Start implementing the functionality for each department.
+5.  Add login authentication with Supabase integration.
