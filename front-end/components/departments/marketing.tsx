@@ -196,17 +196,137 @@ export default function Marketing({
     const fetchCampaigns = async () => {
       try {
         const response = await fetch("/api/campaigns");
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        setCampaigns(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setCampaigns(data);
+        } else {
+          // Inject fake campaigns if API returns empty
+          setCampaigns([
+            {
+              id: 1,
+              name: "Spring Launch",
+              status: "active",
+              performance: 85,
+              budget: "$12,000",
+              startDate: "2024-03-01",
+              endDate: "2024-06-30",
+              targetAudience: "Young professionals",
+              channels: ["email", "ads"],
+              roi: 2.5,
+              client: "Client A",
+              niche: "Fashion",
+            },
+            {
+              id: 2,
+              name: "Summer Sale",
+              status: "paused",
+              performance: 60,
+              budget: "$8,000",
+              startDate: "2024-07-01",
+              endDate: "2024-08-31",
+              targetAudience: "Students",
+              channels: ["social media", "ads"],
+              roi: 1.8,
+              client: "Client B",
+              niche: "Education",
+            },
+            {
+              id: 3,
+              name: "Tech Expo",
+              status: "completed",
+              performance: 92,
+              budget: "$25,000",
+              startDate: "2023-09-01",
+              endDate: "2023-09-30",
+              targetAudience: "Tech companies",
+              channels: ["email", "seo"],
+              roi: 3.1,
+              client: "Client C",
+              niche: "Technology",
+            },
+            {
+              id: 4,
+              name: "Holiday Promo",
+              status: "pending",
+              performance: 0,
+              budget: "$15,000",
+              startDate: "2024-11-15",
+              endDate: "2024-12-31",
+              targetAudience: "Families",
+              channels: ["ads", "content marketing"],
+              roi: 0,
+              client: "Client A",
+              niche: "Retail",
+            },
+          ]);
+        }
       } catch (error) {
         console.error("Error fetching campaigns:", error);
         toast({
           title: "Error",
-          description: "Failed to load campaigns.",
+          description: "Failed to load campaigns. Showing demo data.",
           variant: "destructive",
         });
+        // Inject fake campaigns if API fails
+        setCampaigns([
+          {
+            id: 1,
+            name: "Spring Launch",
+            status: "active",
+            performance: 85,
+            budget: "$12,000",
+            startDate: "2024-03-01",
+            endDate: "2024-06-30",
+            targetAudience: "Young professionals",
+            channels: ["email", "ads"],
+            roi: 2.5,
+            client: "Client A",
+            niche: "Fashion",
+          },
+          {
+            id: 2,
+            name: "Summer Sale",
+            status: "paused",
+            performance: 60,
+            budget: "$8,000",
+            startDate: "2024-07-01",
+            endDate: "2024-08-31",
+            targetAudience: "Students",
+            channels: ["social media", "ads"],
+            roi: 1.8,
+            client: "Client B",
+            niche: "Education",
+          },
+          {
+            id: 3,
+            name: "Tech Expo",
+            status: "completed",
+            performance: 92,
+            budget: "$25,000",
+            startDate: "2023-09-01",
+            endDate: "2023-09-30",
+            targetAudience: "Tech companies",
+            channels: ["email", "seo"],
+            roi: 3.1,
+            client: "Client C",
+            niche: "Technology",
+          },
+          {
+            id: 4,
+            name: "Holiday Promo",
+            status: "pending",
+            performance: 0,
+            budget: "$15,000",
+            startDate: "2024-11-15",
+            endDate: "2024-12-31",
+            targetAudience: "Families",
+            channels: ["ads", "content marketing"],
+            roi: 0,
+            client: "Client A",
+            niche: "Retail",
+          },
+        ]);
       }
     };
 

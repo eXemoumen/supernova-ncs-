@@ -355,6 +355,16 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
+// Fake chart data for demo purposes (revenue and expenses)
+export const fakeChartData = [
+  { name: "Jan", revenue: 12000, expenses: 8000 },
+  { name: "Feb", revenue: 13500, expenses: 9000 },
+  { name: "Mar", revenue: 15000, expenses: 9500 },
+  { name: "Apr", revenue: 14000, expenses: 8500 },
+  { name: "May", revenue: 16000, expenses: 10000 },
+  { name: "Jun", revenue: 17000, expenses: 11000 },
+];
+
 export {
   ChartContainer,
   ChartTooltip,

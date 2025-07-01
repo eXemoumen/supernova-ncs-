@@ -172,8 +172,8 @@ export default function Dashboard() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-900">
         <div className="flex flex-col items-center space-y-4">
-          <div className="loading-spinner h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-          <p className="text-slate-300">Loading NCS-HACK platform...</p>
+          <img src="/logo.png" alt="Businessly Logo" className="h-16 w-16 animate-pulse" />
+          <p className="text-slate-300">Loading Businessly platform...</p>
         </div>
       </div>
     )

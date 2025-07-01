@@ -457,9 +457,9 @@ const handleItemClick = (id: string, type: "department" | "section") => {
     )}>
       <div className="flex items-center justify-between p-4 h-16 border-b">
         {isExpanded ? (
-          <h2 className="text-lg font-semibold tracking-tight truncate">NCS-HACK</h2>
+          <img src="/logo-text.png" alt="Businessly Logo" className="h-8 w-auto" />
         ) : (
-          <span className="text-lg font-bold mx-auto">NH</span>
+          <img src="/logo.png" alt="Businessly Icon" className="h-8 w-auto mx-auto" />
         )}
         {!isMobile && (
           <Button
