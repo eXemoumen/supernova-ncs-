@@ -76,6 +76,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { AgentForm } from "@/components/agent-form";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MarketingProps {
   onBackAction: () => void;
@@ -146,6 +147,7 @@ export default function Marketing({
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const [contextData, setContextData] = useState("");
   const [topicPrompt, setTopicPrompt] = useState("");
+  const [showChatbot, setShowChatbot] = useState(false);
   const [generatedContentIdeas, setGeneratedContentIdeas] = useState<
     ContentIdea[]
   >([]);
@@ -159,6 +161,8 @@ export default function Marketing({
 
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [clients, setClients] = useState<any[]>([]);
+
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -470,35 +474,35 @@ export default function Marketing({
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Marketing Dashboard</h2>
             {renderMarketingDashboard()}
-          </div>
+                    </div>
         );
       case "campaign-management":
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Campaign Management</h2>
             {renderCampaignManagement()}
-          </div>
+                  </div>
         );
       case "content-creation":
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Content Creation</h2>
             {renderContentCreation()}
-          </div>
+                    </div>
         );
       case "campaign-configuration":
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Campaign Configuration</h2>
             {renderCampaignConfiguration()}
-          </div>
+                  </div>
         );
       default:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Marketing Hub</h2>
             {renderMarketingDashboard()}
-          </div>
+                    </div>
         );
     }
   };
@@ -510,13 +514,13 @@ export default function Marketing({
         <Card className="bg-slate-800/50 border-slate-700/50 col-span-full">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg text-white">Revenue & Marketing Spend</CardTitle>
-            <CardDescription className="text-slate-400">
+                <CardDescription className="text-slate-400">
               Last 6 months performance
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
                 <RechartsLineChart
                   data={marketingData}
                   margin={{ top: 20, right: 10, left: 10, bottom: 20 }}
@@ -536,51 +540,51 @@ export default function Marketing({
                     axisLine={{ stroke: "#334155" }}
                     tickFormatter={(value) => `$${value}`}
                   />
-                  <Tooltip
-                    contentStyle={{
+                      <Tooltip
+                        contentStyle={{
                       backgroundColor: "#1e293b",
                       borderColor: "#334155",
                       borderRadius: "0.375rem",
                       color: "#f8fafc",
                     }}
                     formatter={(value: any) => [`$${value}`, ""]}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
                     stroke="#4C9AFF"
                     strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 6, fill: "#4C9AFF", stroke: "#1e293b" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="spend"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="spend"
                     stroke="#FF5630"
                     strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 6, fill: "#FF5630", stroke: "#1e293b" }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="roi"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="roi"
                     stroke="#36B37E"
                     strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 6, fill: "#36B37E", stroke: "#1e293b" }}
-                  />
-                </RechartsLineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        
+                      />
+                    </RechartsLineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
         {/* KPI Cards */}
         <Card className="bg-slate-800/50 border-slate-700/50">
-          <CardHeader>
+              <CardHeader>
             <CardTitle className="text-lg text-white">
               <TrendingUp className="inline mr-2 h-5 w-5" /> ROI
-            </CardTitle>
+                </CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="text-3xl font-bold text-emerald-400">312%</div>
@@ -616,8 +620,8 @@ export default function Marketing({
         <Card className="bg-slate-800/50 border-slate-700/50 col-span-full">
           <CardHeader>
             <CardTitle className="text-lg text-white">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
+              </CardHeader>
+              <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Button 
                 className="bg-indigo-600 hover:bg-indigo-700" 
@@ -625,12 +629,12 @@ export default function Marketing({
               >
                 <Target className="mr-2 h-5 w-5" /> Manage Campaigns
               </Button>
-              <Button 
+                <Button
                 className="bg-purple-600 hover:bg-purple-700"
                 onClick={() => onSectionChange && onSectionChange("content-creation")}
-              >
+                >
                 <PenTool className="mr-2 h-5 w-5" /> Create Content
-              </Button>
+                </Button>
               <Button 
                 className="bg-blue-600 hover:bg-blue-700" 
                 onClick={() => onSectionChange && onSectionChange("campaign-configuration")}
@@ -644,15 +648,15 @@ export default function Marketing({
                 <Bot className="mr-2 h-5 w-5" /> AI Assist
               </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
+              </CardContent>
+            </Card>
+          </div>
+        );
   };
-  
+
   const renderCampaignManagement = () => {
-    return (
-      <div className="space-y-6">
+        return (
+          <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="text-lg font-medium text-white">Active Campaigns</h3>
@@ -671,31 +675,31 @@ export default function Marketing({
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium text-white">{campaign.name}</h3>
-                      <Badge className={getStatusColor(campaign.status)}>
+                        <Badge className={getStatusColor(campaign.status)}>
                         {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                      </Badge>
-                    </div>
+                        </Badge>
+                      </div>
                     <div className="mt-1 text-sm text-slate-400">
                       Client: {campaign.client} • Budget: {campaign.budget}
-                    </div>
+                      </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {campaign.channels.map((channel, idx) => (
                         <Badge key={idx} variant="outline" className="bg-slate-700/50">
                           {channel}
                         </Badge>
                       ))}
-                    </div>
-                  </div>
+                      </div>
+                      </div>
                   <div className="text-right">
                     <div className="text-sm text-slate-400">Performance</div>
                     <div className="text-xl font-bold text-white">{campaign.performance}%</div>
                     <div className="mt-1 text-xs text-emerald-400">ROI: {campaign.roi}x</div>
-                  </div>
+                    </div>
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
                   <Button variant="outline" size="sm">
                     <Eye className="mr-2 h-4 w-4" /> View
-                  </Button>
+                </Button>
                   <Button variant="outline" size="sm">
                     <PenTool className="mr-2 h-4 w-4" /> Edit
                   </Button>
@@ -704,13 +708,13 @@ export default function Marketing({
             </Card>
           ))}
         </div>
-      </div>
-    );
+          </div>
+        );
   };
   
   const renderContentCreation = () => {
-    return (
-      <div className="space-y-6">
+        return (
+          <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="text-lg font-medium text-white">Content Ideas</h3>
@@ -736,12 +740,12 @@ export default function Marketing({
         </div>
         
         <Card className="bg-slate-800/50 border-slate-700/50">
-          <CardHeader>
+              <CardHeader>
             <CardTitle className="text-lg text-white">Generate Content Ideas</CardTitle>
             <CardDescription>
               Enter details about your target audience and campaign goals
-            </CardDescription>
-          </CardHeader>
+                </CardDescription>
+              </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
@@ -770,9 +774,9 @@ export default function Marketing({
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-        
+              </CardContent>
+            </Card>
+
         {generatedContentIdeas.length > 0 && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-white">Generated Ideas</h3>
@@ -785,23 +789,23 @@ export default function Marketing({
                         <h3 className="font-medium text-white">{idea.title}</h3>
                         <Badge className={getPriorityColor(idea.priority)}>
                           {idea.priority.charAt(0).toUpperCase() + idea.priority.slice(1)}
-                        </Badge>
-                      </div>
+                            </Badge>
+                          </div>
                       <div className="mt-1 text-sm text-slate-400">Type: {idea.type}</div>
-                    </div>
+                          </div>
                   </div>
                   <div className="mt-4 flex justify-end gap-2">
                     <Button variant="outline" size="sm" onClick={() => handleApproveIdea(idea.id)}>
                       <CheckCircle className="mr-2 h-4 w-4" /> Approve
-                    </Button>
+                            </Button>
                     <Button variant="outline" size="sm" onClick={() => handleDeleteIdea(idea.id, "generated")}>
                       <XCircle className="mr-2 h-4 w-4" /> Delete
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
             ))}
-          </div>
+                </div>
         )}
         
         {approvedContentIdeas.length > 0 && (
@@ -816,41 +820,41 @@ export default function Marketing({
                         <h3 className="font-medium text-white">{idea.title}</h3>
                         <Badge className={getPriorityColor(idea.priority)}>
                           {idea.priority.charAt(0).toUpperCase() + idea.priority.slice(1)}
-                        </Badge>
-                      </div>
+                            </Badge>
+                          </div>
                       <div className="mt-1 text-sm text-slate-400">Type: {idea.type}</div>
-                    </div>
+                          </div>
                   </div>
                   <div className="mt-4 flex justify-end gap-2">
                     <Button variant="outline" size="sm">
                       <PenTool className="mr-2 h-4 w-4" /> Edit
-                    </Button>
+                          </Button>
                     <Button variant="outline" size="sm" onClick={() => handleDeleteIdea(idea.id, "approved")}>
                       <XCircle className="mr-2 h-4 w-4" /> Delete
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+              </CardContent>
+            </Card>
             ))}
           </div>
         )}
-      </div>
-    );
+          </div>
+        );
   };
   
   const renderCampaignConfiguration = () => {
-    return (
-      <div className="space-y-6">
+        return (
+          <div className="space-y-6">
         <div className="space-y-1">
           <h3 className="text-lg font-medium text-white">AI Campaign Configuration</h3>
           <p className="text-sm text-slate-400">Configure AI modules for your marketing campaigns</p>
-        </div>
+          </div>
         
         <AgentForm 
           department="marketing"
           onClose={() => {}}
         />
-      </div>
+                </div>
     );
   };
 
@@ -858,18 +862,18 @@ export default function Marketing({
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Professional Header */}
       <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="flex items-center space-x-2">
-                <div className="p-2 bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 rounded-xl shadow-lg">
-                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 rounded-xl shadow-lg">
+                  <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-base sm:text-xl font-semibold text-white">
+                  <h1 className="text-sm sm:text-base md:text-xl font-semibold text-white truncate">
                     Marketing Hub
                   </h1>
-                  <p className="text-xs sm:text-sm text-slate-400 hidden sm:block">
+                  <p className="text-xs md:text-sm text-slate-400 hidden sm:block truncate max-w-[200px] md:max-w-xs">
                     AI-Powered Campaign Management & Content Creation
                   </p>
                 </div>
@@ -879,17 +883,17 @@ export default function Marketing({
               <Button
                 variant="outline"
                 size="sm"
-                className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700"
+                className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700 h-8 px-2 sm:px-3"
                 onClick={onBackAction}
               >
-                <ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" /> 
+                <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0 sm:mr-2" /> 
                 <span className="hidden sm:inline">Back</span>
               </Button>
-              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 font-medium hidden sm:inline-flex">
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 font-medium text-xs hidden sm:inline-flex">
                 <Zap className="h-3 w-3 mr-1" />
                 AI Enabled
               </Badge>
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-medium text-xs sm:text-sm">
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-medium text-xs">
                 {campaigns.filter((c) => c.status === "active").length} Active
               </Badge>
             </div>
@@ -897,298 +901,35 @@ export default function Marketing({
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-4rem)] flex-col md:flex-row">
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-          {/* Content Area */}
-          <div className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto">
+      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Main Content and Chatbot Layout */}
+        <div className="flex flex-1 w-full">
+          {/* Main Content Area */}
+          <div className={`${isMobile ? 'w-full' : 'w-2/3'} p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto`}>
             {renderMainContent()}
           </div>
-
-          {/* AI Assistant Panel */}
-          <div className="w-full md:w-96 bg-slate-900/95 backdrop-blur-md border-t md:border-l border-slate-700/50 shadow-lg flex flex-col overflow-hidden">
-            {/* Client and Niche Selection */}
-            <div className="p-3 sm:p-4 md:p-6 border-b border-slate-700/50">
-              <div className="space-y-3 md:space-y-4">
-                <div>
-                  <Label
-                    htmlFor="client-select-ai"
-                    className="text-sm font-medium text-slate-300 mb-2 block"
-                  >
-                    Select Client
-                  </Label>
-                  <Select
-                    value={selectedClientId || ""}
-                    onValueChange={setSelectedClientId}
-                  >
-                    <SelectTrigger
-                      id="client-select-ai"
-                      className="h-10 md:h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400"
-                    >
-                      <SelectValue placeholder="Choose a client" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-600 bg-slate-800">
-                      {clients.length === 0 ? (
-                        <SelectItem value="no-clients" disabled>
-                          No clients available
-                        </SelectItem>
-                      ) : (
-                        clients.map((client) => (
-                          <SelectItem
-                            key={client.id}
-                            value={client.id}
-                            className="py-2 md:py-3 text-white"
-                          >
-                            <div className="flex items-center space-x-2 md:space-x-3 w-full">
-                              <Avatar className="h-6 w-6 md:h-8 md:w-8">
-                                <AvatarImage
-                                  src={client.avatar || "/placeholder.svg"}
-                                />
-                                <AvatarFallback className="bg-blue-600 text-white text-xs font-medium">
-                                  {client.name.slice(0, 2)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="font-medium text-white text-sm md:text-base">
-                                  {client.name}
-                                </div>
-                                <div className="text-xs text-slate-400 flex items-center space-x-2">
-                                  <span>{client.industry}</span>
-                                  <span>•</span>
-                                  <span className="flex items-center">
-                                    <Star className="h-3 w-3 text-amber-400 mr-1" />
-                                    {client.satisfaction}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+          
+          {/* Integrated Chatbot (Desktop Only) */}
+          {!isMobile && (
+            <div className="w-1/3 border-l border-slate-700/50">
+              <DepartmentChatbot 
+                department="Marketing Hub"
+                specialization="campaign management and content strategy"
+                displayMode="integrated"
+              />
             </div>
-            {/* AI Assistant Header */}
-            <div className="p-3 sm:p-4 md:p-6 border-b border-slate-700/50">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg">
-                  <Bot className="h-4 w-4 md:h-5 md:w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-base md:text-lg font-semibold text-white">
-                    AI Marketing Strategist
-                  </h3>
-                  <p className="text-xs md:text-sm text-slate-400">
-                    Your intelligent marketing assistant
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Context Input */}
-            <div className="p-3 sm:p-4 md:p-6 border-b border-slate-700/50">
-              <div className="space-y-3 md:space-y-4">
-                <div>
-                  <Label
-                    htmlFor="context-data"
-                    className="text-sm font-medium text-slate-300 mb-2 block"
-                  >
-                    Marketing Brief
-                  </Label>
-                  <Textarea
-                    id="context-data"
-                    value={contextData}
-                    onChange={(e) => setContextData(e.target.value)}
-                    placeholder="Campaign goals, target audience, brand guidelines..."
-                    className="min-h-[60px] md:min-h-[80px] border-slate-600 bg-slate-900/50 text-white focus:border-blue-400 resize-none text-sm"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium text-slate-300 mb-2 block">
-                    Attach Files
-                  </Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { type: "document", label: "Doc", icon: FileText },
-                      { type: "image", label: "Image", icon: ImageIcon },
-                      { type: "video", label: "Video", icon: Video },
-                    ].map((item) => (
-                      <Button
-                        key={item.type}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleFileUpload(item.type)}
-                        className="flex flex-col items-center p-3 h-auto border-slate-600 hover:border-blue-400 hover:bg-blue-500/20 bg-transparent text-slate-300"
-                      >
-                        <item.icon className="h-4 w-4 mb-1 text-slate-400" />
-                        <span className="text-xs font-medium">
-                          {item.label}
-                        </span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                {attachedFiles.length > 0 && (
-                  <div className="space-y-2">
-                    {attachedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg border border-slate-700"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Paperclip className="h-3 w-3 text-slate-500" />
-                          <span className="text-xs text-slate-300 font-medium">
-                            {file}
-                          </span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            setAttachedFiles((prev) =>
-                              prev.filter((_, i) => i !== index)
-                            )
-                          }
-                          className="h-5 w-5 p-0 text-slate-400 hover:text-red-400"
-                        >
-                          <XCircle className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Chat Messages */}
-            <ScrollArea className="flex-1 p-3 sm:p-4 md:p-6">
-              <div className="space-y-3 md:space-y-4">
-                {chatMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.type === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`flex items-start space-x-3 max-w-[85%] ${
-                        message.type === "user"
-                          ? "flex-row-reverse space-x-reverse"
-                          : ""
-                      }`}
-                    >
-                      <Avatar className="h-7 w-7 flex-shrink-0">
-                        {message.type === "user" ? (
-                          <AvatarFallback className="bg-blue-600 text-white text-xs">
-                            <User className="h-3 w-3" />
-                          </AvatarFallback>
-                        ) : (
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs">
-                            <Bot className="h-3 w-3" />
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div
-                        className={`p-3 rounded-xl text-sm ${
-                          message.type === "user"
-                            ? "bg-blue-600 text-white"
-                            : "bg-slate-800/50 text-slate-300 border border-slate-700"
-                        }`}
-                      >
-                        <p className="leading-relaxed whitespace-pre-wrap">
-                          {message.content}
-                        </p>
-                        {message.attachments && (
-                          <div className="mt-2 space-y-1">
-                            {message.attachments.map((file, index) => (
-                              <div
-                                key={index}
-                                className={`text-xs flex items-center space-x-1 ${
-                                  message.type === "user"
-                                    ? "text-blue-200"
-                                    : "text-slate-500"
-                                }`}
-                              >
-                                <Paperclip className="h-3 w-3" />
-                                <span>{file}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <p
-                          className={`text-xs mt-2 ${
-                            message.type === "user"
-                              ? "text-blue-200"
-                              : "text-slate-500"
-                          }`}
-                        >
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="flex items-start space-x-3">
-                      <Avatar className="h-7 w-7">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
-                          <Bot className="h-3 w-3" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                          <div
-                            className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0.1s" }}
-                          ></div>
-                          <div
-                            className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0.2s" }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-
-            {/* Chat Input */}
-            <div className="p-3 sm:p-4 md:p-6 border-t border-slate-700/50">
-              <div className="space-y-2 sm:space-y-3">
-                <div className="flex space-x-2">
-                  <Input
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    placeholder="Describe your marketing requirements..."
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && !e.shiftKey && handleSendMessage()
-                    }
-                    className="flex-1 h-10 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400 text-sm"
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={
-                      (!inputMessage.trim() && attachedFiles.length === 0) ||
-                      isTyping
-                    }
-                    className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 px-3 sm:px-4"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
+
+      {/* Mobile Chatbot (Overlay Mode) */}
+      {isMobile && (
+        <DepartmentChatbot 
+          department="Marketing Hub"
+          specialization="campaign management and content strategy"
+          displayMode="overlay"
+        />
+      )}
     </div>
   );
 }

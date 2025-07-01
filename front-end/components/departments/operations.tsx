@@ -49,6 +49,7 @@ import {
   Brain, // Added for Operations icon
   TrendingDown, // Added for Finance icon
   PieChart, // Added for Finance icon
+  Settings,
 } from "lucide-react"
 
 import { DepartmentChatbot } from "@/components/department-chatbot"
@@ -56,6 +57,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useToast } from "@/hooks/use-toast"
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 import { AgentForm } from "@/components/agent-form"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface OperationsProps { // Renamed from MarketingProps
   onBack: () => void
@@ -605,309 +607,77 @@ export default function Operations({ // Renamed from Marketing
     }
   }
 
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Professional Header */}
       <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2.5 bg-gradient-to-br from-orange-500 via-red-500 to-orange-600 rounded-xl shadow-lg"> {/* Updated colors */}
-                  <Brain className="h-5 w-5 text-white" /> {/* Updated icon */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 sm:p-2 bg-gradient-to-br from-purple-500 via-indigo-500 to-purple-600 rounded-xl shadow-lg">
+                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-semibold text-white">Operations Hub</h1> {/* Updated title */}
-                  <p className="text-sm text-slate-400">AI-Powered Project Management & Workflow Automation</p> {/* Updated description */}
+                  <h1 className="text-sm sm:text-base md:text-xl font-semibold text-white truncate">
+                    Operations
+                  </h1>
+                  <p className="text-xs md:text-sm text-slate-400 hidden sm:block truncate max-w-[200px] md:max-w-xs">
+                    AI-Powered Operations Management
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <Button
                 variant="outline"
                 size="sm"
-                className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700"
+                className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700 h-8 px-2 sm:px-3"
                 onClick={onBack}
               >
-                <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
+                <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
               </Button>
-              <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30 font-medium"> {/* Updated colors */}
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 font-medium text-xs hidden sm:inline-flex">
                 <Zap className="h-3 w-3 mr-1" />
                 AI Enabled
               </Badge>
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-medium">
-                {approvedContentIdeas.length} Completed Projects {/* Updated text */}
-              </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700"
-              >
-                <Bell className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-4rem)]">
-        {/* Main Content Area */}
-        <div className="flex-1 flex">
-          {/* Content Area */}
-          <div className="flex-1 p-8 overflow-y-auto">{renderMainContent()}</div>
-
-          {/* AI Assistant Panel */}
-          <div className="w-96 bg-slate-900/95 backdrop-blur-md border-l border-slate-700/50 shadow-lg flex flex-col">
-            {/* Client and Niche Selection */}
-            <div className="p-6 border-b border-slate-700/50">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="client-select-ai" className="text-sm font-medium text-slate-300 mb-2 block">
-                    Select Client
-                  </Label>
-                  <Select value={selectedClient || ""} onValueChange={setSelectedClient}>
-                    <SelectTrigger id="client-select-ai" className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400">
-                      <SelectValue placeholder="Choose a client" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-600 bg-slate-800">
-                      {clients.length === 0 ? (
-                        <SelectItem value="no-clients" disabled>No clients available</SelectItem>
-                      ) : (
-                        clients.map((client) => (
-                          <SelectItem key={client.id} value={client.name} className="py-3 text-white">
-                            <div className="flex items-center space-x-3 w-full">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={client.avatar || "/placeholder.svg"} />
-                                <AvatarFallback className="bg-blue-600 text-white text-xs font-medium">
-                                  {client.name.slice(0, 2)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="font-medium text-white">{client.name}</div>
-                                <div className="text-xs text-slate-400 flex items-center space-x-2">
-                                  <span>{client.industry}</span>
-                                  <span>•</span>
-                                  <span className="flex items-center">
-                                    <Star className="h-3 w-3 text-amber-400 mr-1" />
-                                    {client.satisfaction}
-                                  </span>
-                                </div>
-                              </div>
-                              <Badge variant="outline" className="text-xs border-slate-600 text-slate-300">
-                                {client.tier}
-                              </Badge>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="niche-select-ai" className="text-sm font-medium text-slate-300 mb-2 block">
-                    Select Niche
-                  </Label>
-                  <Select value={selectedNiche || ""} onValueChange={setSelectedNiche}>
-                    <SelectTrigger id="niche-select-ai" className="h-11 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400">
-                      <SelectValue placeholder="Select a niche" />
-                    </SelectTrigger>
-                    <SelectContent className="border-slate-600 bg-slate-800">
-                      {niches.length === 0 ? (
-                        <SelectItem value="no-niches" disabled>No niches available</SelectItem>
-                      ) : (
-                        niches.map((niche) => (
-                          <SelectItem key={niche.value} value={niche.value} className="py-2 text-white">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-lg">{niche.icon}</span>
-                              <span className="font-medium">{niche.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-            {/* AI Assistant Header */}
-            <div className="p-6 border-b border-slate-700/50">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg"> {/* Updated colors */}
-                  <Bot className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white">AI Operations Assistant</h3> {/* Updated title */}
-                  <p className="text-sm text-slate-400">Your intelligent operations partner</p> {/* Updated description */}
-                </div>
-              </div>
-            </div>
-
-            {/* Context Input */}
-            <div className="p-6 border-b border-slate-700/50">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="context-data" className="text-sm font-medium text-slate-300 mb-2 block">
-                    Operations Brief
-                  </Label>
-                  <Textarea
-                    id="context-data"
-                    value={contextData}
-                    onChange={(e) => setContextData(e.target.value)}
-                    placeholder="Project goals, resource constraints, workflow requirements..."
-                    className="min-h-[80px] border-slate-600 bg-slate-900/50 text-white focus:border-blue-400 resize-none text-sm"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium text-slate-300 mb-2 block">Attach Files</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { type: "document", label: "Doc", icon: FileText },
-                      { type: "image", label: "Image", icon: ImageIcon },
-                      { type: "video", label: "Video", icon: Video },
-                    ].map((item) => (
-                      <Button
-                        key={item.type}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleFileUpload(item.type)}
-                        className="flex flex-col items-center p-3 h-auto border-slate-600 hover:border-blue-400 hover:bg-blue-500/20 bg-transparent text-slate-300"
-                      >
-                        <item.icon className="h-4 w-4 mb-1 text-slate-400" />
-                        <span className="text-xs font-medium">{item.label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                {attachedFiles.length > 0 && (
-                  <div className="space-y-2">
-                    {attachedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg border border-slate-700"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Paperclip className="h-3 w-3 text-slate-500" />
-                          <span className="text-xs text-slate-300 font-medium">{file}</span>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setAttachedFiles((prev) => prev.filter((_, i) => i !== index))}
-                          className="h-5 w-5 p-0 text-slate-400 hover:text-red-400"
-                        >
-                          <XCircle className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Chat Messages */}
-            <ScrollArea className="flex-1 p-6">
-              <div className="space-y-4">
-                {chatMessages.map((message) => (
-                  <div key={message.id} className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`flex items-start space-x-3 max-w-[85%] ${message.type === "user" ? "flex-row-reverse space-x-reverse" : ""}`}
-                    >
-                      <Avatar className="h-7 w-7 flex-shrink-0">
-                        {message.type === "user" ? (
-                          <AvatarFallback className="bg-blue-600 text-white text-xs">
-                            <User className="h-3 w-3" />
-                          </AvatarFallback>
-                        ) : (
-                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white text-xs"> {/* Updated colors */}
-                            <Bot className="h-3 w-3" />
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div
-                        className={`p-3 rounded-xl text-sm ${
-                          message.type === "user"
-                            ? "bg-blue-600 text-white"
-                            : "bg-slate-800/50 text-slate-300 border border-slate-700"
-                        }`}
-                      >
-                        <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                        {message.attachments && (
-                          <div className="mt-2 space-y-1">
-                            {message.attachments.map((file, index) => (
-                              <div
-                                key={index}
-                                className={`text-xs flex items-center space-x-1 ${
-                                  message.type === "user" ? "text-blue-200" : "text-slate-500"
-                                }`}
-                              >
-                                <Paperclip className="h-3 w-3" />
-                                <span>{file}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <p className={`text-xs mt-2 ${message.type === "user" ? "text-blue-200" : "text-slate-500"}`}>
-                          {message.timestamp.toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="flex items-start space-x-3">
-                      <Avatar className="h-7 w-7">
-                        <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white"> {/* Updated colors */}
-                          <Bot className="h-3 w-3" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700">
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                          <div
-                            className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0.1s" }}
-                          ></div>
-                          <div
-                            className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"
-                            style={{ animationDelay: "0.2s" }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-
-            {/* Chat Input */}
-            <div className="p-6 border-t border-slate-700/50">
-              <div className="space-y-3">
-                <div className="flex space-x-2">
-                  <Input
-                    value={inputMessage}
-                    onChange={(e) => setInputMessage(e.target.value)}
-                    placeholder="Describe your operations requirements..."
-                    onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
-                    className="flex-1 border-slate-600 bg-slate-900/50 text-white focus:border-blue-400 text-sm"
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={!inputMessage.trim() && attachedFiles.length === 0 || isTyping}
-                    className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-4"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
+      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Main Content and Chatbot Layout */}
+        <div className="flex flex-1 w-full">
+          {/* Main Content Area */}
+          <div className={`${isMobile ? 'w-full' : 'w-2/3'} p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto`}>
+            {renderMainContent()}
           </div>
+          
+          {/* Integrated Chatbot (Desktop Only) */}
+          {!isMobile && (
+            <div className="w-1/3 border-l border-slate-700/50">
+              <DepartmentChatbot 
+                department="Operations"
+                specialization="operations management and process optimization"
+                displayMode="integrated"
+              />
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Mobile Chatbot (Overlay Mode) */}
+      {isMobile && (
+        <DepartmentChatbot 
+          department="Operations"
+          specialization="operations management and process optimization"
+          displayMode="overlay"
+        />
+      )}
     </div>
   )
 }

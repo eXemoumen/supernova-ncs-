@@ -12,11 +12,14 @@ import { X, Play, Save } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface AgentFormProps {
-  department: { name: string } | string
-  onClose: () => void
+  department?: { name: string } | string
+  onClose?: () => void
 }
 
-export function AgentForm({ department, onClose }: AgentFormProps) {
+export function AgentForm({ 
+  department = "general", 
+  onClose = () => {} 
+}: AgentFormProps) {
   const [isRunning, setIsRunning] = useState(false)
   const { toast } = useToast()
 

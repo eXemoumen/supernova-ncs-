@@ -67,6 +67,7 @@ import {
   Settings,
   Filter,
   RefreshCw,
+  Wallet,
 } from "lucide-react";
 
 import { DepartmentChatbot } from "@/components/department-chatbot";
@@ -84,6 +85,7 @@ import {
 import { AgentForm } from "@/components/agent-form";
 import { v4 as uuidv4 } from "uuid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FinanceProps {
   onBackAction: () => void;
@@ -215,6 +217,8 @@ export default function Finance({
       (!selectedNiche || dataPoint.niche === selectedNiche)
     );
   });
+
+  const isMobile = useIsMobile();
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() && selectedFile === null) return;
@@ -725,253 +729,324 @@ export default function Finance({
   }, []);
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
-      <div className="flex-1 p-6">
-        <Tabs defaultValue="chat" className="h-full space-y-6">
-          <div className="space-between flex items-center">
-            <TabsList>
-              <TabsTrigger value="chat">AI Assistant</TabsTrigger>
-              <TabsTrigger value="content">Content Generation</TabsTrigger>
-              <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="chat" className="border-none p-0 outline-none">
-            <div className="flex h-[600px] flex-col space-y-4">
-              <Card className="flex-1 p-4">
-                <ScrollArea className="h-full pr-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`mb-4 flex ${
-                        message.type === "ai" ? "flex-row" : "flex-row-reverse"
-                      }`}
-                    >
-                      <Avatar className="h-8 w-8">
-                        <div className="flex h-full w-full items-center justify-center">
-                          {message.type === "ai" ? (
-                            <FileText className="h-4 w-4" />
-                          ) : (
-                            <div className="h-full w-full bg-primary" />
-                          )}
-                        </div>
-                      </Avatar>
-                      <div
-                        className={`ml-2 rounded-lg px-3 py-2 ${
-                          message.type === "ai"
-                            ? "bg-muted"
-                            : "ml-auto mr-2 bg-primary text-primary-foreground"
-                        }`}
-                      >
-                        <p className="text-sm">{message.content}</p>
-                      </div>
-                    </div>
-                  ))}
-                </ScrollArea>
-              </Card>
-
-              <div className="flex space-x-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="h-4 w-4" />
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    onChange={handleFileUpload}
-                  />
-                </Button>
-                <Input
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                />
-                <Button onClick={handleSendMessage} disabled={isLoading}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="content" className="border-none p-0 outline-none">
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">
-                  Finance Content Generation
-                </h2>
-                <Button
-                  onClick={handleGenerateFinanceContent}
-                  disabled={isLoading}
-                >
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                  Generate Content
-                </Button>
-              </div>
-
-              <div className="grid gap-4">
-                <Card className="p-4">
-                  <h3 className="mb-4 text-lg font-semibold">
-                    Generated Ideas
-                  </h3>
-                  {generatedContentIdeas.map((idea) => (
-                    <div
-                      key={idea.id}
-                      className="mb-4 flex items-center justify-between rounded-lg border p-4"
-                    >
-                      <div>
-                        <h4 className="font-medium">{idea.title}</h4>
-                        <div className="mt-1 flex space-x-2">
-                          <Badge variant="outline">{idea.type}</Badge>
-                          <Badge
-                            variant={
-                              idea.priority === "high"
-                                ? "destructive"
-                                : idea.priority === "medium"
-                                ? "default"
-                                : "secondary"
-                            }
-                          >
-                            {idea.priority}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleApproveIdea(idea.id)}
-                        >
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                          Approve
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDeleteIdea(idea.id, "generated")}
-                        >
-                          <XCircle className="mr-2 h-4 w-4" />
-                          Reject
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </Card>
-
-                <Card className="p-4">
-                  <h3 className="mb-4 text-lg font-semibold">
-                    Approved Content
-                  </h3>
-                  {approvedContentIdeas.map((idea) => (
-                    <div
-                      key={idea.id}
-                      className="mb-4 flex items-center justify-between rounded-lg border p-4"
-                    >
-                      <div>
-                        <h4 className="font-medium">{idea.title}</h4>
-                        <div className="mt-1 flex space-x-2">
-                          <Badge variant="outline">{idea.type}</Badge>
-                          <Badge variant="outline">Approved</Badge>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="reports" className="border-none p-0 outline-none">
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">
-                  Financial Reports & Analytics
-                </h2>
-                <div className="flex space-x-2">
-                  <Button variant="outline">
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filter
-                  </Button>
-                  <Button variant="outline">
-                    <Download className="mr-2 h-4 w-4" />
-                    Export
-                  </Button>
-                  <Button variant="outline">
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Refresh
-                  </Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Professional Header */}
+      <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 sm:p-2 bg-gradient-to-br from-green-500 via-emerald-500 to-green-600 rounded-xl shadow-lg">
+                  <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-sm sm:text-base md:text-xl font-semibold text-white truncate">
+                    Finance Department
+                  </h1>
+                  <p className="text-xs md:text-sm text-slate-400 hidden sm:block truncate max-w-[200px] md:max-w-xs">
+                    AI-Powered Financial Management & Analysis
+                  </p>
                 </div>
               </div>
-
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Revenue</p>
-                      <h3 className="text-2xl font-bold">$128,400</h3>
-                    </div>
-                    <TrendingUp className="h-8 w-8 text-green-500" />
-                  </div>
-                </Card>
-
-                <Card className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Expenses</p>
-                      <h3 className="text-2xl font-bold">$54,200</h3>
-                    </div>
-                    <TrendingDown className="h-8 w-8 text-red-500" />
-                  </div>
-                </Card>
-
-                <Card className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Profit Margin</p>
-                      <h3 className="text-2xl font-bold">32.5%</h3>
-                    </div>
-                    <Target className="h-8 w-8 text-blue-500" />
-                  </div>
-                </Card>
-
-                <Card className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Cash Flow</p>
-                      <h3 className="text-2xl font-bold">$74,200</h3>
-                    </div>
-                    <DollarSign className="h-8 w-8 text-yellow-500" />
-                  </div>
-                </Card>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <Card className="p-4">
-                  <h3 className="mb-4 text-lg font-semibold">
-                    Revenue Breakdown
-                  </h3>
-                  <div className="h-[300px]">
-                    <PieChart className="h-full w-full text-muted-foreground" />
-                  </div>
-                </Card>
-
-                <Card className="p-4">
-                  <h3 className="mb-4 text-lg font-semibold">Monthly Trends</h3>
-                  <div className="h-[300px]">
-                    <LineChart className="h-full w-full text-muted-foreground" />
-                  </div>
-                </Card>
-              </div>
             </div>
-          </TabsContent>
-        </Tabs>
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700 h-8 px-2 sm:px-3"
+                onClick={onBackAction}
+              >
+                <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 font-medium text-xs hidden sm:inline-flex">
+                <Zap className="h-3 w-3 mr-1" />
+                AI Enabled
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Main Content and Chatbot Layout */}
+        <div className="flex flex-1 w-full">
+          {/* Main Content Area */}
+          <div className={`${isMobile ? 'w-full' : 'w-2/3'} p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto`}>
+            <div className="max-w-7xl mx-auto">
+              <Tabs defaultValue="dashboard" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                  <TabsTrigger value="chat">Chat</TabsTrigger>
+                  <TabsTrigger value="content">Content</TabsTrigger>
+                  <TabsTrigger value="reports">Reports</TabsTrigger>
+                </TabsList>
+                
+                {/* Existing TabsContent sections */}
+                <TabsContent value="dashboard" className="border-none p-0 outline-none">
+                  {renderMainContent()}
+                </TabsContent>
+                
+                {/* Rest of the existing tabs */}
+                <TabsContent value="chat" className="border-none p-0 outline-none">
+                  <div className="flex h-[600px] flex-col space-y-4">
+                    <Card className="flex-1 p-4">
+                      <ScrollArea className="h-full pr-4">
+                        {messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`mb-4 flex ${
+                              message.type === "ai" ? "flex-row" : "flex-row-reverse"
+                            }`}
+                          >
+                            <Avatar className="h-8 w-8">
+                              <div className="flex h-full w-full items-center justify-center">
+                                {message.type === "ai" ? (
+                                  <FileText className="h-4 w-4" />
+                                ) : (
+                                  <div className="h-full w-full bg-primary" />
+                                )}
+                              </div>
+                            </Avatar>
+                            <div
+                              className={`ml-2 rounded-lg px-3 py-2 ${
+                                message.type === "ai"
+                                  ? "bg-muted"
+                                  : "ml-auto mr-2 bg-primary text-primary-foreground"
+                              }`}
+                            >
+                              <p className="text-sm">{message.content}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </ScrollArea>
+                    </Card>
+
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Upload className="h-4 w-4" />
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          className="hidden"
+                          onChange={handleFileUpload}
+                        />
+                      </Button>
+                      <Input
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        placeholder="Type your message..."
+                        onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                      />
+                      <Button onClick={handleSendMessage} disabled={isLoading}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="content" className="border-none p-0 outline-none">
+                  <div className="grid gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold">
+                        Finance Content Generation
+                      </h2>
+                      <Button
+                        onClick={handleGenerateFinanceContent}
+                        disabled={isLoading}
+                      >
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Generate Content
+                      </Button>
+                    </div>
+
+                    <div className="grid gap-4">
+                      <Card className="p-4">
+                        <h3 className="mb-4 text-lg font-semibold">
+                          Generated Ideas
+                        </h3>
+                        {generatedContentIdeas.map((idea) => (
+                          <div
+                            key={idea.id}
+                            className="mb-4 flex items-center justify-between rounded-lg border p-4"
+                          >
+                            <div>
+                              <h4 className="font-medium">{idea.title}</h4>
+                              <div className="mt-1 flex space-x-2">
+                                <Badge variant="outline">{idea.type}</Badge>
+                                <Badge
+                                  variant={
+                                    idea.priority === "high"
+                                      ? "destructive"
+                                      : idea.priority === "medium"
+                                      ? "default"
+                                      : "secondary"
+                                  }
+                                >
+                                  {idea.priority}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleApproveIdea(idea.id)}
+                              >
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Approve
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteIdea(idea.id, "generated")}
+                              >
+                                <XCircle className="mr-2 h-4 w-4" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </Card>
+
+                      <Card className="p-4">
+                        <h3 className="mb-4 text-lg font-semibold">
+                          Approved Content
+                        </h3>
+                        {approvedContentIdeas.map((idea) => (
+                          <div
+                            key={idea.id}
+                            className="mb-4 flex items-center justify-between rounded-lg border p-4"
+                          >
+                            <div>
+                              <h4 className="font-medium">{idea.title}</h4>
+                              <div className="mt-1 flex space-x-2">
+                                <Badge variant="outline">{idea.type}</Badge>
+                                <Badge variant="outline">Approved</Badge>
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </Card>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="reports" className="border-none p-0 outline-none">
+                  <div className="grid gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold">
+                        Financial Reports & Analytics
+                      </h2>
+                      <div className="flex space-x-2">
+                        <Button variant="outline">
+                          <Filter className="mr-2 h-4 w-4" />
+                          Filter
+                        </Button>
+                        <Button variant="outline">
+                          <Download className="mr-2 h-4 w-4" />
+                          Export
+                        </Button>
+                        <Button variant="outline">
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Refresh
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                      <Card className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">Revenue</p>
+                            <h3 className="text-2xl font-bold">$128,400</h3>
+                          </div>
+                          <TrendingUp className="h-8 w-8 text-green-500" />
+                        </div>
+                      </Card>
+
+                      <Card className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">Expenses</p>
+                            <h3 className="text-2xl font-bold">$54,200</h3>
+                          </div>
+                          <TrendingDown className="h-8 w-8 text-red-500" />
+                        </div>
+                      </Card>
+
+                      <Card className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">Profit Margin</p>
+                            <h3 className="text-2xl font-bold">32.5%</h3>
+                          </div>
+                          <Target className="h-8 w-8 text-blue-500" />
+                        </div>
+                      </Card>
+
+                      <Card className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">Cash Flow</p>
+                            <h3 className="text-2xl font-bold">$74,200</h3>
+                          </div>
+                          <DollarSign className="h-8 w-8 text-yellow-500" />
+                        </div>
+                      </Card>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Card className="p-4">
+                        <h3 className="mb-4 text-lg font-semibold">
+                          Revenue Breakdown
+                        </h3>
+                        <div className="h-[300px]">
+                          <PieChart className="h-full w-full text-muted-foreground" />
+                        </div>
+                      </Card>
+
+                      <Card className="p-4">
+                        <h3 className="mb-4 text-lg font-semibold">Monthly Trends</h3>
+                        <div className="h-[300px]">
+                          <LineChart className="h-full w-full text-muted-foreground" />
+                        </div>
+                      </Card>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </div>
+          
+          {/* Integrated Chatbot (Desktop Only) */}
+          {!isMobile && (
+            <div className="w-1/3 border-l border-slate-700/50">
+              <DepartmentChatbot 
+                department="Finance Department"
+                specialization="financial analysis and reporting"
+                displayMode="integrated"
+              />
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Mobile Chatbot (Overlay Mode) */}
+      {isMobile && (
+        <DepartmentChatbot 
+          department="Finance Department"
+          specialization="financial analysis and reporting"
+          displayMode="overlay"
+        />
+      )}
     </div>
   );
 }

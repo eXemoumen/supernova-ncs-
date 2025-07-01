@@ -261,6 +261,11 @@ export default function Dashboard() {
       )}>
         {renderMainContent()}
       </div>
+      
+      {/* Empty space in top-left corner on mobile to avoid conflicts with menu button */}
+      {isMobile && (
+        <div className="fixed top-0 left-0 w-16 h-16 z-[90]" aria-hidden="true" />
+      )}
     </div>
   )
 }

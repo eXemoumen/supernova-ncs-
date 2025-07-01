@@ -550,9 +550,9 @@ export function ExecutiveDashboard({
                 </div>
               );
             })}
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
               </div>
 
       {/* Departments Quick Access */}

@@ -44,7 +44,7 @@ import {
 } from "lucide-react"
 import { supabase } from "../lib/supabaseClient"
 import { useIsMobile, useIsTablet, useTouchDevice, usePrefersReducedMotion } from "@/hooks/use-mobile"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
@@ -288,7 +288,7 @@ export function GlobalSidebar({
     },
   ]
 
-  const handleItemClick = (id: string, type: "department" | "section") => {
+const handleItemClick = (id: string, type: "department" | "section") => {
     if (type === "department") {
       if (id === "marketing") {
         if (currentDepartment === "marketing") {
@@ -314,7 +314,7 @@ export function GlobalSidebar({
       // Don't close mobile menu when selecting a section
     }
   }
-  
+
   const handleMarketingSectionClick = (sectionId: string) => {
     // First navigate to marketing if not already there
     if (currentDepartment !== "marketing") {
@@ -341,7 +341,7 @@ export function GlobalSidebar({
     
     return (
       <div key={dept.id} className="space-y-1">
-        <Button
+              <Button
           variant={isActive ? "secondary" : "ghost"}
           className={cn(
             "w-full",
@@ -350,7 +350,7 @@ export function GlobalSidebar({
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           )}
           onClick={() => handleItemClick(dept.id, "department")}
-        >
+              >
           <div className="flex items-center">
             <dept.icon className={cn(
               "h-5 w-5 flex-shrink-0",
@@ -366,9 +366,9 @@ export function GlobalSidebar({
                 {dept.description && (
                   <p className="text-xs text-muted-foreground truncate">{dept.description}</p>
                 )}
-              </div>
+                      </div>
             )}
-          </div>
+                    </div>
           
           {!isExpanded && (
             <TooltipProvider>
@@ -391,24 +391,22 @@ export function GlobalSidebar({
           )}
           
           {showExpander && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-5 w-5 p-0 ml-auto"
+            <div 
+              className="h-5 w-5 p-0 ml-auto cursor-pointer flex items-center justify-center hover:bg-slate-700/50 rounded-sm"
               onClick={(e) => {
                 e.stopPropagation();
                 toggleMarketing(!isMarketingExpanded);
               }}
             >
               {isItemExpanded ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
-                <ChevronDown className="h-4 w-4" />
-              )}
-            </Button>
-          )}
-        </Button>
-        
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </div>
+                )}
+              </Button>
+
         {/* Marketing Subsections */}
         {dept.id === "marketing" && isExpanded && isMarketingExpanded && (
           <div className={cn(
@@ -417,27 +415,27 @@ export function GlobalSidebar({
             prefersReducedMotion && "transition-none"
           )}>
             {marketingSections.map((section) => (
-              <Button
-                key={section.id}
+                      <Button
+                        key={section.id}
                 variant={activeSection === section.id ? "secondary" : "ghost"}
-                size="sm"
+                        size="sm"
                 className={cn(
                   "w-full justify-start h-auto py-2 text-sm",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 )}
                 onClick={() => handleMarketingSectionClick(section.id)}
-              >
+                      >
                 <section.icon className="h-4 w-4 mr-2" />
                 <span className="truncate">{section.name}</span>
                 {section.count !== null && (
                   <Badge variant="outline" className="ml-auto">
-                    {section.count}
-                  </Badge>
-                )}
-              </Button>
+                            {section.count}
+                          </Badge>
+                        )}
+                      </Button>
             ))}
-          </div>
-        )}
+                </div>
+              )}
       </div>
     );
   };
@@ -467,19 +465,19 @@ export function GlobalSidebar({
             )}
             aria-label={isExpanded ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {isExpanded ? (
+          {isExpanded ? (
               <ChevronLeft className="h-4 w-4" />
             ) : (
               <ChevronRight className="h-4 w-4" />
             )}
           </Button>
         )}
-      </div>
+              </div>
 
       <ScrollArea className="flex-1 px-2">
         <div className="space-y-1 py-2">
           {departments.map(renderSidebarItem)}
-        </div>
+            </div>
       </ScrollArea>
 
       <div className="mt-auto border-t">
@@ -525,20 +523,21 @@ export function GlobalSidebar({
 
   // Mobile sidebar and bottom navigation
   if (isMobile) {
-    return (
+              return (
       <>
         <Sheet>
           <SheetTrigger asChild>
             <Button
               variant="outline"
               size="icon" 
-              className="fixed top-4 left-4 z-50 bg-background/80 backdrop-blur-sm border-slate-700/50 shadow-md"
+              className="fixed top-4 left-4 z-[100] bg-background/80 backdrop-blur-sm border-slate-700/50 shadow-md"
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Open navigation</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-[85%] max-w-[300px] border-slate-700/50 overflow-y-auto">
+          <SheetContent side="left" className="p-0 w-[85%] max-w-[300px] border-slate-700/50 overflow-y-auto z-[100]">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
             <div className="h-full flex flex-col">
               <SidebarContent />
             </div>
@@ -546,7 +545,7 @@ export function GlobalSidebar({
         </Sheet>
         
         {/* Bottom Mobile Navigation */}
-        <nav className="safe-bottom fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-slate-700/50 h-16 flex items-center justify-around px-4 z-40 shadow-md">
+        <nav className="safe-bottom fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-slate-700/50 h-16 flex items-center justify-around px-4 z-50 shadow-md">
           {departments.slice(0, 5).map((dept) => (
             <Button
               key={dept.id}
