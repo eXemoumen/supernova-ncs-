@@ -196,7 +196,8 @@ export default function Marketing({
     const fetchCampaigns = async () => {
       try {
         const response = await fetch("/api/campaigns");
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         if (Array.isArray(data) && data.length > 0) {
           setCampaigns(data);
@@ -220,7 +221,7 @@ export default function Marketing({
             {
               id: 2,
               name: "Summer Sale",
-              status: "paused",
+              status: "draft",
               performance: 60,
               budget: "$8,000",
               startDate: "2024-07-01",
@@ -248,7 +249,7 @@ export default function Marketing({
             {
               id: 4,
               name: "Holiday Promo",
-              status: "pending",
+              status: "draft",
               performance: 0,
               budget: "$15,000",
               startDate: "2024-11-15",
@@ -287,7 +288,7 @@ export default function Marketing({
           {
             id: 2,
             name: "Summer Sale",
-            status: "paused",
+            status: "draft",
             performance: 60,
             budget: "$8,000",
             startDate: "2024-07-01",
@@ -315,7 +316,7 @@ export default function Marketing({
           {
             id: 4,
             name: "Holiday Promo",
-            status: "pending",
+            status: "draft",
             performance: 0,
             budget: "$15,000",
             startDate: "2024-11-15",
@@ -592,60 +593,72 @@ export default function Marketing({
       case "marketing-dashboard":
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Marketing Dashboard</h2>
+            <h2 className="text-2xl font-bold text-white">
+              Marketing Dashboard
+            </h2>
             {renderMarketingDashboard()}
-                    </div>
+          </div>
         );
       case "campaign-management":
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Campaign Management</h2>
+            <h2 className="text-2xl font-bold text-white">
+              Campaign Management
+            </h2>
             {renderCampaignManagement()}
-                  </div>
+          </div>
         );
       case "content-creation":
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Content Creation</h2>
             {renderContentCreation()}
-                    </div>
+          </div>
         );
       case "campaign-configuration":
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-white">Campaign Configuration</h2>
+            <h2 className="text-2xl font-bold text-white">
+              Campaign Configuration
+            </h2>
             {renderCampaignConfiguration()}
-                  </div>
+          </div>
         );
       default:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Marketing Hub</h2>
             {renderMarketingDashboard()}
-                    </div>
+          </div>
         );
     }
   };
-  
+
   const renderMarketingDashboard = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Revenue Card */}
         <Card className="bg-slate-800/50 border-slate-700/50 col-span-full">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-white">Revenue & Marketing Spend</CardTitle>
-                <CardDescription className="text-slate-400">
+            <CardTitle className="text-lg text-white">
+              Revenue & Marketing Spend
+            </CardTitle>
+            <CardDescription className="text-slate-400">
               Last 6 months performance
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
                 <RechartsLineChart
                   data={marketingData}
                   margin={{ top: 20, right: 10, left: 10, bottom: 20 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#334155"
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="month"
                     stroke="#94a3b8"
@@ -660,58 +673,60 @@ export default function Marketing({
                     axisLine={{ stroke: "#334155" }}
                     tickFormatter={(value) => `$${value}`}
                   />
-                      <Tooltip
-                        contentStyle={{
+                  <Tooltip
+                    contentStyle={{
                       backgroundColor: "#1e293b",
                       borderColor: "#334155",
                       borderRadius: "0.375rem",
                       color: "#f8fafc",
-                        }}
+                    }}
                     formatter={(value: any) => [`$${value}`, ""]}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="revenue"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="revenue"
                     stroke="#4C9AFF"
                     strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 6, fill: "#4C9AFF", stroke: "#1e293b" }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="spend"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="spend"
                     stroke="#FF5630"
                     strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 6, fill: "#FF5630", stroke: "#1e293b" }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="roi"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="roi"
                     stroke="#36B37E"
                     strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 6, fill: "#36B37E", stroke: "#1e293b" }}
-                      />
-                    </RechartsLineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+                  />
+                </RechartsLineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* KPI Cards */}
         <Card className="bg-slate-800/50 border-slate-700/50">
-              <CardHeader>
+          <CardHeader>
             <CardTitle className="text-lg text-white">
               <TrendingUp className="inline mr-2 h-5 w-5" /> ROI
-                </CardTitle>
+            </CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="text-3xl font-bold text-emerald-400">312%</div>
-            <p className="text-slate-400 text-sm mt-2">Average campaign return</p>
+            <p className="text-slate-400 text-sm mt-2">
+              Average campaign return
+            </p>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-slate-800/50 border-slate-700/50">
           <CardHeader>
             <CardTitle className="text-lg text-white">
@@ -719,11 +734,13 @@ export default function Marketing({
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <div className="text-3xl font-bold text-blue-400">{campaigns.filter(c => c.status === 'active').length}</div>
+            <div className="text-3xl font-bold text-blue-400">
+              {campaigns.filter((c) => c.status === "active").length}
+            </div>
             <p className="text-slate-400 text-sm mt-2">Currently running</p>
           </CardContent>
         </Card>
-        
+
         <Card className="bg-slate-800/50 border-slate-700/50">
           <CardHeader>
             <CardTitle className="text-lg text-white">
@@ -731,95 +748,119 @@ export default function Marketing({
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <div className="text-3xl font-bold text-purple-400">{contentIdeas.length}</div>
+            <div className="text-3xl font-bold text-purple-400">
+              {contentIdeas.length}
+            </div>
             <p className="text-slate-400 text-sm mt-2">Ready to implement</p>
           </CardContent>
         </Card>
-        
+
         {/* Quick Links */}
         <Card className="bg-slate-800/50 border-slate-700/50 col-span-full">
           <CardHeader>
             <CardTitle className="text-lg text-white">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
+          </CardHeader>
+          <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button 
-                className="bg-indigo-600 hover:bg-indigo-700" 
-                onClick={() => onSectionChange && onSectionChange("campaign-management")}
+              <Button
+                className="bg-indigo-600 hover:bg-indigo-700"
+                onClick={() =>
+                  onSectionChange && onSectionChange("campaign-management")
+                }
               >
                 <Target className="mr-2 h-5 w-5" /> Manage Campaigns
               </Button>
-                <Button
+              <Button
                 className="bg-purple-600 hover:bg-purple-700"
-                onClick={() => onSectionChange && onSectionChange("content-creation")}
-                >
+                onClick={() =>
+                  onSectionChange && onSectionChange("content-creation")
+                }
+              >
                 <PenTool className="mr-2 h-5 w-5" /> Create Content
-                </Button>
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700" 
-                onClick={() => onSectionChange && onSectionChange("campaign-configuration")}
+              </Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() =>
+                  onSectionChange && onSectionChange("campaign-configuration")
+                }
               >
                 <Settings className="mr-2 h-5 w-5" /> Configure AI
               </Button>
-              <Button 
+              <Button
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => handleGenerateTopics()}
               >
                 <Bot className="mr-2 h-5 w-5" /> AI Assist
               </Button>
             </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
+          </CardContent>
+        </Card>
+      </div>
+    );
   };
 
   const renderCampaignManagement = () => {
-        return (
-          <div className="space-y-6">
+    return (
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="text-lg font-medium text-white">Active Campaigns</h3>
-            <p className="text-sm text-slate-400">Manage your ongoing marketing campaigns</p>
+            <p className="text-sm text-slate-400">
+              Manage your ongoing marketing campaigns
+            </p>
           </div>
           <Button onClick={() => setIsGeneratingCampaigns(true)}>
             <PlusCircle className="mr-2 h-4 w-4" /> New Campaign
           </Button>
         </div>
-        
+
         <div className="grid gap-4">
           {campaigns.map((campaign) => (
-            <Card key={campaign.id} className="bg-slate-800/50 border-slate-700/50">
+            <Card
+              key={campaign.id}
+              className="bg-slate-800/50 border-slate-700/50"
+            >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-white">{campaign.name}</h3>
-                        <Badge className={getStatusColor(campaign.status)}>
-                        {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                        </Badge>
-                      </div>
+                      <h3 className="font-medium text-white">
+                        {campaign.name}
+                      </h3>
+                      <Badge className={getStatusColor(campaign.status)}>
+                        {campaign.status.charAt(0).toUpperCase() +
+                          campaign.status.slice(1)}
+                      </Badge>
+                    </div>
                     <div className="mt-1 text-sm text-slate-400">
                       Client: {campaign.client} • Budget: {campaign.budget}
-                      </div>
+                    </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {campaign.channels.map((channel, idx) => (
-                        <Badge key={idx} variant="outline" className="bg-slate-700/50">
+                        <Badge
+                          key={idx}
+                          variant="outline"
+                          className="bg-slate-700/50"
+                        >
                           {channel}
                         </Badge>
                       ))}
-                      </div>
-                      </div>
+                    </div>
+                  </div>
                   <div className="text-right">
                     <div className="text-sm text-slate-400">Performance</div>
-                    <div className="text-xl font-bold text-white">{campaign.performance}%</div>
-                    <div className="mt-1 text-xs text-emerald-400">ROI: {campaign.roi}x</div>
+                    <div className="text-xl font-bold text-white">
+                      {campaign.performance}%
                     </div>
+                    <div className="mt-1 text-xs text-emerald-400">
+                      ROI: {campaign.roi}x
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-4 flex justify-end gap-2">
                   <Button variant="outline" size="sm">
                     <Eye className="mr-2 h-4 w-4" /> View
-                </Button>
+                  </Button>
                   <Button variant="outline" size="sm">
                     <PenTool className="mr-2 h-4 w-4" /> Edit
                   </Button>
@@ -828,20 +869,25 @@ export default function Marketing({
             </Card>
           ))}
         </div>
-          </div>
-        );
+      </div>
+    );
   };
-  
+
   const renderContentCreation = () => {
-        return (
-          <div className="space-y-6">
+    return (
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="text-lg font-medium text-white">Content Ideas</h3>
-            <p className="text-sm text-slate-400">Generate and manage content ideas for your campaigns</p>
+            <p className="text-sm text-slate-400">
+              Generate and manage content ideas for your campaigns
+            </p>
           </div>
           <div className="flex gap-2">
-            <Select value={selectedClientId || ""} onValueChange={setSelectedClientId}>
+            <Select
+              value={selectedClientId || ""}
+              onValueChange={setSelectedClientId}
+            >
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Select client" />
               </SelectTrigger>
@@ -858,18 +904,22 @@ export default function Marketing({
             </Button>
           </div>
         </div>
-        
+
         <Card className="bg-slate-800/50 border-slate-700/50">
-              <CardHeader>
-            <CardTitle className="text-lg text-white">Generate Content Ideas</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-lg text-white">
+              Generate Content Ideas
+            </CardTitle>
             <CardDescription>
               Enter details about your target audience and campaign goals
-                </CardDescription>
-              </CardHeader>
+            </CardDescription>
+          </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="topic-prompt">What type of content do you need?</Label>
+                <Label htmlFor="topic-prompt">
+                  What type of content do you need?
+                </Label>
                 <Textarea
                   id="topic-prompt"
                   placeholder="E.g., 'Blog posts about sustainable fashion for millennials' or 'Instagram captions for our new product launch'"
@@ -879,7 +929,10 @@ export default function Marketing({
                 />
               </div>
               <div className="flex justify-end">
-                <Button onClick={handleGenerateTopics} disabled={isGeneratingTopics || !topicPrompt}>
+                <Button
+                  onClick={handleGenerateTopics}
+                  disabled={isGeneratingTopics || !topicPrompt}
+                >
                   {isGeneratingTopics ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -894,88 +947,113 @@ export default function Marketing({
                 </Button>
               </div>
             </div>
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
 
         {generatedContentIdeas.length > 0 && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-white">Generated Ideas</h3>
             {generatedContentIdeas.map((idea) => (
-              <Card key={idea.id} className="bg-slate-800/50 border-slate-700/50">
+              <Card
+                key={idea.id}
+                className="bg-slate-800/50 border-slate-700/50"
+              >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium text-white">{idea.title}</h3>
                         <Badge className={getPriorityColor(idea.priority)}>
-                          {idea.priority.charAt(0).toUpperCase() + idea.priority.slice(1)}
-                            </Badge>
-                          </div>
-                      <div className="mt-1 text-sm text-slate-400">Type: {idea.type}</div>
-                          </div>
+                          {idea.priority.charAt(0).toUpperCase() +
+                            idea.priority.slice(1)}
+                        </Badge>
+                      </div>
+                      <div className="mt-1 text-sm text-slate-400">
+                        Type: {idea.type}
+                      </div>
+                    </div>
                   </div>
                   <div className="mt-4 flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleApproveIdea(idea.id)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleApproveIdea(idea.id)}
+                    >
                       <CheckCircle className="mr-2 h-4 w-4" /> Approve
-                            </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDeleteIdea(idea.id, "generated")}>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteIdea(idea.id, "generated")}
+                    >
                       <XCircle className="mr-2 h-4 w-4" /> Delete
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
-                </div>
+          </div>
         )}
-        
+
         {approvedContentIdeas.length > 0 && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-white">Approved Ideas</h3>
             {approvedContentIdeas.map((idea) => (
-              <Card key={idea.id} className="bg-slate-800/50 border-slate-700/50">
+              <Card
+                key={idea.id}
+                className="bg-slate-800/50 border-slate-700/50"
+              >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium text-white">{idea.title}</h3>
                         <Badge className={getPriorityColor(idea.priority)}>
-                          {idea.priority.charAt(0).toUpperCase() + idea.priority.slice(1)}
-                            </Badge>
-                          </div>
-                      <div className="mt-1 text-sm text-slate-400">Type: {idea.type}</div>
-                          </div>
+                          {idea.priority.charAt(0).toUpperCase() +
+                            idea.priority.slice(1)}
+                        </Badge>
+                      </div>
+                      <div className="mt-1 text-sm text-slate-400">
+                        Type: {idea.type}
+                      </div>
+                    </div>
                   </div>
                   <div className="mt-4 flex justify-end gap-2">
                     <Button variant="outline" size="sm">
                       <PenTool className="mr-2 h-4 w-4" /> Edit
-                          </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDeleteIdea(idea.id, "approved")}>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteIdea(idea.id, "approved")}
+                    >
                       <XCircle className="mr-2 h-4 w-4" /> Delete
                     </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
-          </div>
-        );
+      </div>
+    );
   };
-  
+
   const renderCampaignConfiguration = () => {
-        return (
-          <div className="space-y-6">
+    return (
+      <div className="space-y-6">
         <div className="space-y-1">
-          <h3 className="text-lg font-medium text-white">AI Campaign Configuration</h3>
-          <p className="text-sm text-slate-400">Configure AI modules for your marketing campaigns</p>
-          </div>
-        
-        <AgentForm 
-          department="marketing"
-          onClose={() => {}}
-        />
-                </div>
-        );
+          <h3 className="text-lg font-medium text-white">
+            AI Campaign Configuration
+          </h3>
+          <p className="text-sm text-slate-400">
+            Configure AI modules for your marketing campaigns
+          </p>
+        </div>
+
+        <AgentForm department="marketing" onClose={() => {}} />
+      </div>
+    );
   };
 
   return (
@@ -984,7 +1062,7 @@ export default function Marketing({
       <header className="bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
           <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="flex items-center space-x-2">
                 <div className="p-1.5 sm:p-2 bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 rounded-xl shadow-lg">
                   <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:h-5 md:w-5 text-white" />
@@ -1006,7 +1084,7 @@ export default function Marketing({
                 className="text-slate-300 bg-transparent border-slate-600 hover:bg-slate-700 h-8 px-2 sm:px-3"
                 onClick={onBackAction}
               >
-                <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0 sm:mr-2" /> 
+                <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0 sm:mr-2" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
               <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 font-medium text-xs hidden sm:inline-flex">
@@ -1024,32 +1102,36 @@ export default function Marketing({
       <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
         {/* Main Content and Chatbot Layout */}
         <div className="flex flex-1 w-full">
-        {/* Main Content Area */}
-          <div className={`${isMobile ? 'w-full' : 'w-2/3'} p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto`}>
+          {/* Main Content Area */}
+          <div
+            className={`${
+              isMobile ? "w-full" : "w-2/3"
+            } p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto`}
+          >
             {renderMainContent()}
           </div>
 
           {/* Integrated Chatbot (Desktop Only) */}
           {!isMobile && (
             <div className="w-1/3 border-l border-slate-700/50">
-              <DepartmentChatbot 
+              <DepartmentChatbot
                 department="Marketing Hub"
                 specialization="campaign management and content strategy"
                 displayMode="integrated"
               />
-                                </div>
-          )}
-              </div>
             </div>
+          )}
+        </div>
+      </div>
 
       {/* Mobile Chatbot (Overlay Mode) */}
       {isMobile && (
-        <DepartmentChatbot 
+        <DepartmentChatbot
           department="Marketing Hub"
           specialization="campaign management and content strategy"
           displayMode="overlay"
         />
-                )}
+      )}
     </div>
   );
 }
